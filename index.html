@@ -14,9 +14,9 @@
      * 1) Configure These Variables
      ***************************************************************/
     const CLIENT_ID = "c6dcc699-08b2-4484-a165-63dcf225e982";            // e.g., "abc12345-1234-abcd-5678-0123456789ab"
-    const REDIRECT_URI = "https://ishockie.github.io/PopularContacts";      // e.g., "https://mydomain.com/genesys-calls.html"
-    const GENESYS_ENV = "mypurecloud.de";           // or "mypurecloud.ie", "mypurecloud.de", etc.
-                                                     // Use the correct region for your org.
+    const REDIRECT_URI = "https://ishockie.github.io/PopularContacts";   // e.g., "https://mydomain.com/genesys-calls.html"
+    const GENESYS_ENV = "mypurecloud.de";                                // or "mypurecloud.ie", "mypurecloud.de", etc.
+    const QUEUE_ID = "355fda98-7d75-4f67-9f15-491acb1a37aa";            // Queue ID for routing calls
 
     /***************************************************************
      * 2) Parse Access Token From URL (Implicit Flow)
@@ -57,7 +57,7 @@
     }
 
     /***************************************************************
-     * 4) Place a Call Using the Genesys Cloud API
+     * 4) Place a Call Using the Genesys Cloud API via a Queue
      ***************************************************************/
     async function placeCall(phoneNumber) {
       if (!accessToken) {
@@ -73,7 +73,8 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            phoneNumber: phoneNumber
+            phoneNumber: phoneNumber,
+            queueId: QUEUE_ID // Route the call through the specified queue
           })
         });
 
@@ -85,8 +86,8 @@
         }
 
         const data = await response.json();
-        console.log("Call initiated:", data);
-        alert("Call initiated successfully.");
+        console.log("Call initiated via queue:", data);
+        alert("Call initiated successfully via queue.");
       } catch (err) {
         console.error("Fetch error:", err);
         alert("Error placing call. Check console for details.");
@@ -97,7 +98,7 @@
      * 5) Attach Event to the Button
      ***************************************************************/
     document.getElementById("callBtn").addEventListener("click", () => {
-      placeCall("+38640132345");
+      placeCall("+38640132345"); // Replace with the desired phone number
     });
   </script>
 </body>
