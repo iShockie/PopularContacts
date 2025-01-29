@@ -7,7 +7,7 @@
 <body>
   <h1>Genesys Call Example</h1>
   <!-- The button that places the call -->
-  <button id="callBtn">VID ŽVAN2</button>
+  <button id="callBtn">VID ŽVAN3</button>
 
   <script>
     /***************************************************************
@@ -57,7 +57,52 @@
     }
 
     /***************************************************************
-     * 4) Place a Call Using the Genesys Cloud API via a Queue
+     * 4) Check OAuth Client Permissions
+     ***************************************************************/
+    async function checkPermissions() {
+      try {
+        const response = await fetch(`https://api.${GENESYS_ENV}/api/v2/oauth/clients/${CLIENT_ID}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + accessToken
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Error fetching OAuth client details:", errorData);
+          return false;
+        }
+
+        const clientData = await response.json();
+        console.log("OAuth Client Details:", clientData);
+
+        // Check if the required permissions are present
+        const requiredPermissions = [
+          "conversations:call:add",
+          "routing:queue:add",
+          "users:routingstatus:view",
+          "telephony:plugin:all"
+        ];
+
+        const hasPermissions = requiredPermissions.every(perm => 
+          clientData.roles.some(role => role.permissions.includes(perm))
+        );
+
+        if (!hasPermissions) {
+          console.error("Missing required permissions.");
+          return false;
+        }
+
+        return true;
+      } catch (err) {
+        console.error("Fetch error:", err);
+        return false;
+      }
+    }
+
+    /***************************************************************
+     * 5) Place a Call Using the Genesys Cloud API via a Queue
      ***************************************************************/
     async function placeCall(phoneNumber) {
       if (!accessToken) {
@@ -73,26 +118,26 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            phoneNumber: phoneNumber,
-            queueId: QUEUE_ID, // Route the call through the specified queue
-            callbackUserName: "Web Caller", // Optional: Name to show in the call log
+            phoneNumber: phoneNumber, // External phone number
+            queueId: QUEUE_ID, // Queue ID
+            callbackUserName: "Web Caller", // Optional: Name for the call log
             callbackNumbers: [phoneNumber], // Optional: Callback numbers
             data: {
-              // Optional: Additional data for the call
-              customData: "Call from Web Interface"
+              customData: "Call from Web Interface" // Optional: Additional data
             }
           })
         });
 
+        const responseData = await response.json();
+        console.log("API Response:", responseData);
+
         if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Error placing call:", errorData);
+          console.error("Error placing call:", responseData);
           alert("Error placing call. Check console for details.");
           return;
         }
 
-        const data = await response.json();
-        console.log("Call initiated via queue:", data);
+        console.log("Call initiated via queue:", responseData);
         alert("Call initiated successfully via queue.");
       } catch (err) {
         console.error("Fetch error:", err);
@@ -101,11 +146,24 @@
     }
 
     /***************************************************************
-     * 5) Attach Event to the Button
+     * 6) Initialize the Script
      ***************************************************************/
-    document.getElementById("callBtn").addEventListener("click", () => {
-      placeCall("+38640132345"); // Replace with the desired phone number
-    });
+    async function init() {
+      // Check permissions before allowing the call
+      const hasPermissions = await checkPermissions();
+      if (!hasPermissions) {
+        alert("Missing required permissions. Please check your OAuth client configuration.");
+        return;
+      }
+
+      // Attach event to the button
+      document.getElementById("callBtn").addEventListener("click", () => {
+        placeCall("+38640132345"); // Replace with the desired phone number
+      });
+    }
+
+    // Initialize the script
+    init();
   </script>
 </body>
 </html>
