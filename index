@@ -13,7 +13,7 @@
     /***************************************************************
      * 1) Configure These Variables
      ***************************************************************/
-    const CLIENT_ID = "<YOUR_CLIENT_ID>";            // e.g., "abc12345-1234-abcd-5678-0123456789ab"
+    const CLIENT_ID = "c6dcc699-08b2-4484-a165-63dcf225e982";            // e.g., "abc12345-1234-abcd-5678-0123456789ab"
     const REDIRECT_URI = "<YOUR_REDIRECT_URI>";      // e.g., "https://mydomain.com/genesys-calls.html"
     const GENESYS_ENV = "mypurecloud.com";           // or "mypurecloud.ie", "mypurecloud.de", etc.
                                                      // Use the correct region for your org.
