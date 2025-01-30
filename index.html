@@ -8,11 +8,15 @@
       margin-top: 20px;
       font-weight: bold;
     }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
   <h1>Genesys Contact Outbound Call</h1>
-  <button id="callBtn" disabled>Call External Contact via Queue</button>
+  <button id="callBtn" disabled>Call External Contact via Queue2</button>
   <div id="status">Initializing...</div>
 
   <script>
@@ -213,12 +217,16 @@
             externalContactId: CONTACT_ID, // Correct field name
             queueId: QUEUE_ID,
             userId: agentId,
-            direction: "outbound" // Example additional field if required
+            direction: "outbound" // Include if required by API
             // Add any other required fields as per API documentation
           })
         });
 
+        // Log the full response for debugging
+        console.log("API Response Status:", response.status);
+        console.log("API Response Headers:", [...response.headers.entries()]);
         const data = await response.json();
+        console.log("API Response Body:", data);
 
         if (!response.ok) {
           console.error("API Error:", data);
@@ -226,9 +234,7 @@
           return;
         }
 
-        console.log("Call initiated:", data);
-
-        // Verify association in response
+        // Check if the externalContactId is correctly associated
         if (data.externalContactId !== CONTACT_ID) {
           console.warn("External Contact ID not associated correctly:", data.externalContactId);
           updateStatus("Call placed, but failed to associate external contact.", true);
@@ -246,7 +252,7 @@
       }
     }
 
-    // Initialize the application
+    // Initialize the application on page load
     async function initialize() {
       updateStatus("Fetching necessary data...");
       const agentId = await getAgentId();
