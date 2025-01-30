@@ -81,13 +81,24 @@
         const contactData = await response.json();
         console.log("Contact Data:", contactData);
 
-        // Handle different phone number formats
-        const phoneNumber = contactData.phoneNumber?.number || 
-                           contactData.phoneNumbers?.[0]?.number ||
-                           contactData.details?.find(d => d.field === 'phone')?.value;
+        // Extract phone number from the contact data
+        let phoneNumber = null;
 
-        if (!phoneNumber) {
-          console.error("No phone number found in contact data");
+        // Check common fields where phone numbers might be stored
+        if (contactData.phoneNumber?.number) {
+          phoneNumber = contactData.phoneNumber.number;
+        } else if (contactData.phoneNumbers?.length > 0) {
+          phoneNumber = contactData.phoneNumbers[0].number;
+        } else if (contactData.details) {
+          const phoneDetail = contactData.details.find(d => d.field === 'phone');
+          if (phoneDetail) {
+            phoneNumber = phoneDetail.value;
+          }
+        }
+
+        // Validate the phone number format
+        if (!phoneNumber || !phoneNumber.startsWith("+")) {
+          console.error("Invalid or missing phone number in contact data:", phoneNumber);
           updateStatus("No valid phone number found for the contact.");
           return null;
         }
