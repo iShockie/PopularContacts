@@ -5,8 +5,8 @@
   <title>Genesys Contact Outbound Call</title>
 </head>
 <body>
-  <h1>Genesys Contact Outbound Call</h1>
-  <button id="callBtn">Call External Contact via Queue2</button>
+  <h1>Genesys Contact Outbound Call2</h1>
+  <button id="callBtn">Call External Contact via Queue</button>
   <div id="status"></div>
 
   <script>
@@ -22,34 +22,38 @@
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     if (hashParams.has("access_token")) {
       accessToken = hashParams.get("access_token");
+      // Remove the token from the URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Login redirect
-    function redirectToLogin() {
-      const authUrl = `https://login.${GENESYS_ENV}/oauth/authorize` +
-                      `?client_id=${encodeURIComponent(CLIENT_ID)}` +
-                      `&response_type=token` +
-                      `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
-      window.location.replace(authUrl);
-    }
-
+    // If no access token, redirect to login
     if (!accessToken) {
       redirectToLogin();
+    }
+
+    function redirectToLogin() {
+      const authUrl = `https://login.${GENESYS_ENV}/oauth/authorize` +
+        `?client_id=${encodeURIComponent(CLIENT_ID)}` +
+        `&response_type=token` +
+        `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+      window.location.replace(authUrl);
     }
 
     // Update status on the page
     function updateStatus(message) {
       const statusDiv = document.getElementById("status");
       statusDiv.textContent = message;
+      // If the message starts with "Error", make text red, else green
       statusDiv.style.color = message.startsWith("Error") ? "red" : "green";
     }
 
-    // Get Agent ID
+    // Get the current user's ID (the agent ID)
     async function getAgentId() {
       try {
         const response = await fetch(`https://api.${GENESYS_ENV}/api/v2/users/me`, {
-          headers: { 'Authorization': 'Bearer ' + accessToken }
+          headers: {
+            'Authorization': 'Bearer ' + accessToken
+          }
         });
 
         if (!response.ok) {
@@ -75,7 +79,9 @@
       try {
         const response = await fetch(
           `https://api.${GENESYS_ENV}/api/v2/externalcontacts/contacts/${CONTACT_ID}`,
-          { headers: { 'Authorization': 'Bearer ' + accessToken } }
+          { 
+            headers: { 'Authorization': 'Bearer ' + accessToken }
+          }
         );
 
         if (!response.ok) {
@@ -88,33 +94,55 @@
         const contactData = await response.json();
         console.log("Contact Data:", contactData);
 
-        // Let's print out everything in phoneNumbers if present
-        if (contactData.phoneNumbers) {
-          console.log("Contact phoneNumbers array:", contactData.phoneNumbers);
+        // Log addresses array for debugging
+        if (contactData.addresses) {
+          console.log("Addresses array:", contactData.addresses);
+        }
+        // Log workPhone if present
+        if (contactData.workPhone) {
+          console.log("Work Phone object:", contactData.workPhone);
         }
 
         let phoneNumber = null;
 
-        // 1) Check if there's a top-level phoneNumber property (rarely used, but just in case)
-        if (contactData.phoneNumber?.number) {
-          console.log("Found a top-level phoneNumber property:", contactData.phoneNumber.number);
-          phoneNumber = contactData.phoneNumber.number;
+        // 1) Prefer workPhone.e164 if available
+        if (contactData.workPhone && contactData.workPhone.e164) {
+          phoneNumber = contactData.workPhone.e164;
+          console.log("Using contactData.workPhone.e164:", phoneNumber);
         }
-        // 2) Check the phoneNumbers array
-        else if (Array.isArray(contactData.phoneNumbers) && contactData.phoneNumbers.length > 0) {
-          console.log("Iterating through contactData.phoneNumbers...");
+        // 2) Otherwise, check addresses array for a phone entry
+        else if (Array.isArray(contactData.addresses) && contactData.addresses.length) {
+          for (const addr of contactData.addresses) {
+            console.log("Inspecting address object:", addr);
+            if (
+              addr.mediaType === "PHONE" &&
+              addr.display &&
+              addr.display.startsWith("+")
+            ) {
+              phoneNumber = addr.display; // or addr.e164 if that exists
+              console.log("Using address.display:", phoneNumber);
+              break;
+            }
+          }
+        }
+        // 3) Fall back to any existing phoneNumber field
+        else if (contactData.phoneNumber?.number) {
+          phoneNumber = contactData.phoneNumber.number;
+          console.log("Using top-level phoneNumber.number:", phoneNumber);
+        }
+        // 4) Or the older phoneNumbers array
+        else if (Array.isArray(contactData.phoneNumbers) && contactData.phoneNumbers.length) {
           for (const p of contactData.phoneNumbers) {
-            // Genesys often stores the number in `value`
             const candidateNumber = p.value || p.number || "";
             console.log("Examining phone object:", p, " candidateNumber =", candidateNumber);
-            if (candidateNumber && candidateNumber.startsWith("+")) {
+            if (candidateNumber.startsWith("+")) {
               phoneNumber = candidateNumber;
               console.log("Valid phone number found:", phoneNumber);
               break;
             }
           }
         }
-        // 3) Check if there's a 'details' array containing phone data
+        // 5) If there's a details array
         else if (contactData.details && Array.isArray(contactData.details)) {
           const phoneDetail = contactData.details.find(d => d.field === 'phone');
           if (phoneDetail) {
@@ -123,7 +151,7 @@
           }
         }
 
-        // Validate the phone number format
+        // Validate that the number starts with '+'
         if (!phoneNumber || !phoneNumber.startsWith("+")) {
           console.error("Invalid or missing phone number in contact data:", phoneNumber);
           updateStatus("No valid phone number found for the contact.");
@@ -139,7 +167,7 @@
       }
     }
 
-    // Place Call with Contact Association
+    // Place the call, associating the contact
     async function placeContactCall() {
       if (!accessToken) {
         updateStatus("Error: No access token. Please log in.");
@@ -148,16 +176,20 @@
 
       updateStatus("Starting call process...");
 
+      // 1) Get agent ID
       const agentId = await getAgentId();
       if (!agentId) {
-        return; // Error already handled in getAgentId
+        return; // Error already handled/logged
       }
 
+      // 2) Get contact phone number
       const phoneNumber = await getContactPhoneNumber();
       if (!phoneNumber) {
-        return; // Error already handled in getContactPhoneNumber
+        // Error already handled/logged
+        return;
       }
 
+      // 3) Attempt to place the call
       try {
         console.log("Attempting call with:", {
           phoneNumber,
@@ -181,6 +213,7 @@
         });
 
         const data = await response.json();
+
         if (!response.ok) {
           console.error("API Error:", data);
           updateStatus(`Error: ${data.message || "Failed to place call. Check console for details."}`);
@@ -198,6 +231,7 @@
 
     // Attach event listener
     document.getElementById("callBtn").addEventListener("click", placeContactCall);
+
   </script>
 </body>
 </html>
