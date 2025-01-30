@@ -38,6 +38,13 @@
       redirectToLogin();
     }
 
+    // Update status on the page
+    function updateStatus(message) {
+      const statusDiv = document.getElementById("status");
+      statusDiv.textContent = message;
+      statusDiv.style.color = message.startsWith("Error") ? "red" : "green";
+    }
+
     // Get Agent ID
     async function getAgentId() {
       try {
@@ -81,17 +88,37 @@
         const contactData = await response.json();
         console.log("Contact Data:", contactData);
 
-        // Extract phone number from the contact data
+        // Let's print out everything in phoneNumbers if present
+        if (contactData.phoneNumbers) {
+          console.log("Contact phoneNumbers array:", contactData.phoneNumbers);
+        }
+
         let phoneNumber = null;
 
-        // Check common fields where phone numbers might be stored
+        // 1) Check if there's a top-level phoneNumber property (rarely used, but just in case)
         if (contactData.phoneNumber?.number) {
+          console.log("Found a top-level phoneNumber property:", contactData.phoneNumber.number);
           phoneNumber = contactData.phoneNumber.number;
-        } else if (contactData.phoneNumbers?.length > 0) {
-          phoneNumber = contactData.phoneNumbers[0].number;
-        } else if (contactData.details) {
+        }
+        // 2) Check the phoneNumbers array
+        else if (Array.isArray(contactData.phoneNumbers) && contactData.phoneNumbers.length > 0) {
+          console.log("Iterating through contactData.phoneNumbers...");
+          for (const p of contactData.phoneNumbers) {
+            // Genesys often stores the number in `value`
+            const candidateNumber = p.value || p.number || "";
+            console.log("Examining phone object:", p, " candidateNumber =", candidateNumber);
+            if (candidateNumber && candidateNumber.startsWith("+")) {
+              phoneNumber = candidateNumber;
+              console.log("Valid phone number found:", phoneNumber);
+              break;
+            }
+          }
+        }
+        // 3) Check if there's a 'details' array containing phone data
+        else if (contactData.details && Array.isArray(contactData.details)) {
           const phoneDetail = contactData.details.find(d => d.field === 'phone');
           if (phoneDetail) {
+            console.log("Found a phone detail field:", phoneDetail.value);
             phoneNumber = phoneDetail.value;
           }
         }
@@ -110,13 +137,6 @@
         updateStatus("Network error fetching contact details. Check console for details.");
         return null;
       }
-    }
-
-    // Update status on the page
-    function updateStatus(message) {
-      const statusDiv = document.getElementById("status");
-      statusDiv.textContent = message;
-      statusDiv.style.color = message.startsWith("Error") ? "red" : "green";
     }
 
     // Place Call with Contact Association
