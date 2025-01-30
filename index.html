@@ -16,7 +16,7 @@
 </head>
 <body>
   <h1>Genesys Contact Outbound Call</h1>
-  <button id="callBtn" disabled>Call External Contact via Queue2</button>
+  <button id="callBtn" disabled>Call External Contact via Queue</button>
   <div id="status">Initializing...</div>
 
   <script>
@@ -199,12 +199,14 @@
         }
 
         // 3) Attempt to place the call
-        console.log("Attempting call with:", {
-          phoneNumber,
-          externalContactId: CONTACT_ID, // Ensure correct field name
+        const payload = {
+          phoneNumber: phoneNumber,
+          externalContactId: CONTACT_ID,
           queueId: QUEUE_ID,
-          userId: agentId
-        });
+          userId: agentId,
+          direction: "outbound" // Ensure this aligns with API requirements
+        };
+        console.log("Payload Sent:", payload);
 
         const response = await fetch(`https://api.${GENESYS_ENV}/api/v2/conversations/calls`, {
           method: 'POST',
@@ -212,14 +214,7 @@
             'Authorization': 'Bearer ' + accessToken,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            phoneNumber: phoneNumber,
-            externalContactId: CONTACT_ID, // Correct field name
-            queueId: QUEUE_ID,
-            userId: agentId,
-            direction: "outbound" // Include if required by API
-            // Add any other required fields as per API documentation
-          })
+          body: JSON.stringify(payload)
         });
 
         // Log the full response for debugging
