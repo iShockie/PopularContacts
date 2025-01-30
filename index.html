@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Genesys Call Example</title>
+  <title>Genesys Queue Call Example</title>
 </head>
 <body>
-  <h1>Genesys Call Example</h1>
+  <h1>Genesys Queue Call Example</h1>
   <!-- The button that places the call -->
-  <button id="callBtn">VID ŽVAN</button>
+  <button id="callBtn">Place Call via Queue</button>
 
   <script>
     /***************************************************************
@@ -57,11 +57,45 @@
     }
 
     /***************************************************************
-     * 4) Place a Call Using the Genesys Cloud API via a Queue
+     * 4) Fetch the Agent's userId
+     ***************************************************************/
+    async function getAgentId() {
+      try {
+        const response = await fetch(`https://api.${GENESYS_ENV}/api/v2/users/me`, {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + accessToken,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Error fetching agent ID:", errorData);
+          return null;
+        }
+
+        const userData = await response.json();
+        return userData.id; // This is the agent's userId
+      } catch (err) {
+        console.error("Fetch error:", err);
+        return null;
+      }
+    }
+
+    /***************************************************************
+     * 5) Place a Call Using the Genesys Cloud API via a Queue
      ***************************************************************/
     async function placeCall(phoneNumber) {
       if (!accessToken) {
         alert("No valid access token. Please log in.");
+        return;
+      }
+
+      // Fetch the agent's userId
+      const AGENT_ID = await getAgentId();
+      if (!AGENT_ID) {
+        alert("Unable to fetch agent ID. Please check your access token.");
         return;
       }
 
@@ -74,7 +108,8 @@
           },
           body: JSON.stringify({
             phoneNumber: phoneNumber,
-            queueId: QUEUE_ID // Route the call through the specified queue
+            queueId: QUEUE_ID, // Route the call through the specified queue
+            userId: AGENT_ID   // Associate the call with the agent
           })
         });
 
@@ -95,7 +130,7 @@
     }
 
     /***************************************************************
-     * 5) Attach Event to the Button
+     * 6) Attach Event to the Button
      ***************************************************************/
     document.getElementById("callBtn").addEventListener("click", () => {
       placeCall("+38640132345"); // Replace with the desired phone number
