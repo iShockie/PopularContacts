@@ -119,7 +119,7 @@
               addr.display &&
               addr.display.startsWith("+")
             ) {
-              phoneNumber = addr.display; // or addr.e164 if that exists
+              phoneNumber = addr.display.replace(/\s+/g, ''); // Remove spaces
               console.log("Using address.display:", phoneNumber);
               break;
             }
@@ -193,7 +193,7 @@
       try {
         console.log("Attempting call with:", {
           phoneNumber,
-          contactId: CONTACT_ID,
+          externalContactId: CONTACT_ID, // Updated field name
           queueId: QUEUE_ID,
           userId: agentId
         });
@@ -206,7 +206,7 @@
           },
           body: JSON.stringify({
             phoneNumber: phoneNumber,
-            contactId: CONTACT_ID,
+            externalContactId: CONTACT_ID, // Updated field name
             queueId: QUEUE_ID,
             userId: agentId
           })
