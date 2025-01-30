@@ -8,10 +8,6 @@
       margin-top: 20px;
       font-weight: bold;
     }
-    button:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
   </style>
 </head>
 <body>
@@ -199,14 +195,12 @@
         }
 
         // 3) Attempt to place the call
-        const payload = {
-          phoneNumber: phoneNumber,
-          externalContactId: CONTACT_ID,
+        console.log("Attempting call with:", {
+          phoneNumber,
+          externalContactId: CONTACT_ID, // Ensure correct field name
           queueId: QUEUE_ID,
-          userId: agentId,
-          direction: "outbound" // Ensure this aligns with API requirements
-        };
-        console.log("Payload Sent:", payload);
+          userId: agentId
+        });
 
         const response = await fetch(`https://api.${GENESYS_ENV}/api/v2/conversations/calls`, {
           method: 'POST',
@@ -214,14 +208,17 @@
             'Authorization': 'Bearer ' + accessToken,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            phoneNumber: phoneNumber,
+            externalContactId: CONTACT_ID, // Correct field name
+            queueId: QUEUE_ID,
+            userId: agentId,
+            direction: "outbound" // Example additional field if required
+            // Add any other required fields as per API documentation
+          })
         });
 
-        // Log the full response for debugging
-        console.log("API Response Status:", response.status);
-        console.log("API Response Headers:", [...response.headers.entries()]);
         const data = await response.json();
-        console.log("API Response Body:", data);
 
         if (!response.ok) {
           console.error("API Error:", data);
@@ -229,7 +226,9 @@
           return;
         }
 
-        // Check if the externalContactId is correctly associated
+        console.log("Call initiated:", data);
+
+        // Verify association in response
         if (data.externalContactId !== CONTACT_ID) {
           console.warn("External Contact ID not associated correctly:", data.externalContactId);
           updateStatus("Call placed, but failed to associate external contact.", true);
@@ -247,7 +246,7 @@
       }
     }
 
-    // Initialize the application on page load
+    // Initialize the application
     async function initialize() {
       updateStatus("Fetching necessary data...");
       const agentId = await getAgentId();
