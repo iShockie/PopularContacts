@@ -3,17 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <title>Genesys Contact Outbound Call</title>
-  <style>
-    #status {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-  </style>
 </head>
 <body>
-  <h1>Genesys Contact Outbound Call2</h1>
-  <button id="callBtn" disabled>Call External Contact via Queue2</button>
-  <div id="status">Initializing...</div>
+  <h1>Genesys Contact Outbound Call3</h1>
+  <button id="callBtn">Call External Contact via Queue</button>
+  <div id="status"></div>
 
   <script>
     // Configuration
@@ -46,10 +40,11 @@
     }
 
     // Update status on the page
-    function updateStatus(message, isError = false) {
+    function updateStatus(message) {
       const statusDiv = document.getElementById("status");
       statusDiv.textContent = message;
-      statusDiv.style.color = isError ? "red" : "green";
+      // If the message starts with "Error", make text red, else green
+      statusDiv.style.color = message.startsWith("Error") ? "red" : "green";
     }
 
     // Get the current user's ID (the agent ID)
@@ -64,7 +59,7 @@
         if (!response.ok) {
           const error = await response.json();
           console.error("Agent ID Fetch Error:", error);
-          updateStatus("Failed to fetch agent ID. Check console for details.", true);
+          updateStatus("Failed to fetch agent ID. Check console for details.");
           return null;
         }
 
@@ -74,7 +69,7 @@
 
       } catch (err) {
         console.error("Agent ID Network Error:", err);
-        updateStatus("Network error fetching agent ID. Check console for details.", true);
+        updateStatus("Network error fetching agent ID. Check console for details.");
         return null;
       }
     }
@@ -92,7 +87,7 @@
         if (!response.ok) {
           const error = await response.json();
           console.error("Contact Fetch Error:", error);
-          updateStatus("Failed to fetch contact details. Check console for details.", true);
+          updateStatus("Failed to fetch contact details. Check console for details.");
           return null;
         }
 
@@ -159,7 +154,7 @@
         // Validate that the number starts with '+'
         if (!phoneNumber || !phoneNumber.startsWith("+")) {
           console.error("Invalid or missing phone number in contact data:", phoneNumber);
-          updateStatus("No valid phone number found for the contact.", true);
+          updateStatus("No valid phone number found for the contact.");
           return null;
         }
 
@@ -167,37 +162,38 @@
 
       } catch (err) {
         console.error("Contact Network Error:", err);
-        updateStatus("Network error fetching contact details. Check console for details.", true);
+        updateStatus("Network error fetching contact details. Check console for details.");
         return null;
       }
     }
 
     // Place the call, associating the contact
     async function placeContactCall() {
-      // Disable the call button to prevent multiple clicks
-      const callBtn = document.getElementById("callBtn");
-      callBtn.disabled = true;
+      if (!accessToken) {
+        updateStatus("Error: No access token. Please log in.");
+        return;
+      }
 
       updateStatus("Starting call process...");
 
+      // 1) Get agent ID
+      const agentId = await getAgentId();
+      if (!agentId) {
+        return; // Error already handled/logged
+      }
+
+      // 2) Get contact phone number
+      const phoneNumber = await getContactPhoneNumber();
+      if (!phoneNumber) {
+        // Error already handled/logged
+        return;
+      }
+
+      // 3) Attempt to place the call
       try {
-        // 1) Get agent ID
-        const agentId = await getAgentId();
-        if (!agentId) {
-          return; // Error already handled/logged
-        }
-
-        // 2) Get contact phone number
-        const phoneNumber = await getContactPhoneNumber();
-        if (!phoneNumber) {
-          // Error already handled/logged
-          return;
-        }
-
-        // 3) Attempt to place the call
         console.log("Attempting call with:", {
           phoneNumber,
-          externalContactId: CONTACT_ID, // Ensure correct field name
+          externalContactId: CONTACT_ID, // Updated field name
           queueId: QUEUE_ID,
           userId: agentId
         });
@@ -210,11 +206,9 @@
           },
           body: JSON.stringify({
             phoneNumber: phoneNumber,
-            externalContactId: CONTACT_ID, // Correct field name
+            externalContactId: CONTACT_ID, // Updated field name
             queueId: QUEUE_ID,
-            userId: agentId,
-            direction: "outbound" // Example additional field if required
-            // Add any other required fields as per API documentation
+            userId: agentId
           })
         });
 
@@ -222,46 +216,18 @@
 
         if (!response.ok) {
           console.error("API Error:", data);
-          updateStatus(`Error: ${data.message || "Failed to place call. Check console for details."}`, true);
+          updateStatus(`Error: ${data.message || "Failed to place call. Check console for details."}`);
           return;
         }
 
         console.log("Call initiated:", data);
-
-        // Verify association in response
-        if (data.externalContactId !== CONTACT_ID) {
-          console.warn("External Contact ID not associated correctly:", data.externalContactId);
-          updateStatus("Call placed, but failed to associate external contact.", true);
-        } else {
-          console.log("External Contact associated successfully.");
-          updateStatus("Call initiated and contact associated successfully!");
-        }
+        updateStatus("Call initiated successfully!");
 
       } catch (err) {
         console.error("Call Placement Error:", err);
-        updateStatus("Error: Failed to place call. Check console for details.", true);
-      } finally {
-        // Re-enable the call button after the process
-        callBtn.disabled = false;
+        updateStatus("Error: Failed to place call. Check console for details.");
       }
     }
-
-    // Initialize the application
-    async function initialize() {
-      updateStatus("Fetching necessary data...");
-      const agentId = await getAgentId();
-      const phoneNumber = await getContactPhoneNumber();
-
-      if (agentId && phoneNumber) {
-        document.getElementById("callBtn").disabled = false;
-        updateStatus("Ready to place a call.");
-      } else {
-        updateStatus("Failed to initialize call setup.", true);
-      }
-    }
-
-    // Call initialize on page load
-    window.onload = initialize;
 
     // Attach event listener
     document.getElementById("callBtn").addEventListener("click", placeContactCall);
