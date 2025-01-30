@@ -2,63 +2,41 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Genesys Queue Call Example</title>
+  <title>Genesys Contact Outbound Call</title>
 </head>
 <body>
-  <h1>Genesys Queue Call Example2</h1>
-  <!-- The button that places the call -->
-  <button id="callBtn">Place Call via Queue</button>
+  <h1>Genesys Contact Outbound Call</h1>
+  <button id="callBtn">Call External Contact via Queue</button>
 
   <script>
-    /***************************************************************
-     * 1) Configure These Variables
-     ***************************************************************/
-    const CLIENT_ID = "c6dcc699-08b2-4484-a165-63dcf225e982";            // e.g., "abc12345-1234-abcd-5678-0123456789ab"
-    const REDIRECT_URI = "https://ishockie.github.io/PopularContacts";   // e.g., "https://mydomain.com/genesys-calls.html"
-    const GENESYS_ENV = "mypurecloud.de";                                // or "mypurecloud.ie", "mypurecloud.de", etc.
-    const QUEUE_ID = "355fda98-7d75-4f67-9f15-491acb1a37aa";            // Queue ID for routing calls
+    // 1) Configuration
+    const CLIENT_ID = "c6dcc699-08b2-4484-a165-63dcf225e982";
+    const REDIRECT_URI = "https://ishockie.github.io/PopularContacts";
+    const GENESYS_ENV = "mypurecloud.de";
+    const QUEUE_ID = "355fda98-7d75-4f67-9f15-491acb1a37aa";
+    const CONTACT_ID = "791a605b-7948-4e5a-94e6-5b670054a781"; // External Contact ID
 
-    /***************************************************************
-     * 2) Parse Access Token From URL (Implicit Flow)
-     *    Check if we were redirected back with an #access_token
-     ***************************************************************/
+    // 2) Authentication (unchanged)
     let accessToken = null;
-
-    // Example: URL might look like:
-    // https://mydomain.com/genesys-calls.html#access_token=xyz123&token_type=bearer&expires_in=86400
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     if (hashParams.has("access_token")) {
       accessToken = hashParams.get("access_token");
-      console.log("Got token from URL hash:", accessToken);
-
-      // (Optional) Clean up the URL to remove the token fragment:
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    /***************************************************************
-     * 3) If No Token, Redirect to Genesys Cloud /authorize
-     ***************************************************************/
+    // 3) Login redirect (unchanged)
     function redirectToLogin() {
-      // Build the Genesys Cloud authorize URL
-      // For Implicit flow: response_type=token
       const authUrl = `https://login.${GENESYS_ENV}/oauth/authorize` +
                       `?client_id=${encodeURIComponent(CLIENT_ID)}` +
                       `&response_type=token` +
                       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-                      `&force_login=false`; // set to true to force login screen
-
-      // Redirect the browser to Genesys Cloud's login/authorize
+                      `&force_login=false`;
       window.location.replace(authUrl);
     }
 
-    if (!accessToken) {
-      // No token in URL => we need to authenticate
-      redirectToLogin();
-    }
+    if (!accessToken) redirectToLogin();
 
-    /***************************************************************
-     * 4) Fetch the Agent's userId
-     ***************************************************************/
+    // 4) Get Agent ID (unchanged)
     async function getAgentId() {
       try {
         const response = await fetch(`https://api.${GENESYS_ENV}/api/v2/users/me`, {
@@ -69,33 +47,25 @@
           }
         });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Error fetching agent ID:", errorData);
-          return null;
-        }
-
+        if (!response.ok) throw new Error('Failed to get agent ID');
         const userData = await response.json();
-        return userData.id; // This is the agent's userId
+        return userData.id;
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.error("Error:", err);
         return null;
       }
     }
 
-    /***************************************************************
-     * 5) Place a Call Using the Genesys Cloud API via a Queue
-     ***************************************************************/
-    async function placeCall(phoneNumber) {
+    // 5) Modified call placement using contactId
+    async function placeContactCall() {
       if (!accessToken) {
         alert("No valid access token. Please log in.");
         return;
       }
 
-      // Fetch the agent's userId
       const AGENT_ID = await getAgentId();
       if (!AGENT_ID) {
-        alert("Unable to fetch agent ID. Please check your access token.");
+        alert("Unable to fetch agent ID");
         return;
       }
 
@@ -107,34 +77,30 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            phoneNumber: phoneNumber,
-            queueId: QUEUE_ID, // Route the call through the specified queue
-            userId: AGENT_ID   // Associate the call with the agent
+            contactId: CONTACT_ID,  // Using contact ID instead of phone number
+            queueId: QUEUE_ID,
+            userId: AGENT_ID
           })
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          console.error("Error placing call:", errorData);
-          alert("Error placing call. Check console for details.");
+          console.error("API Error:", errorData);
+          alert("Failed to place call. Check console for details.");
           return;
         }
 
         const data = await response.json();
-        console.log("Call initiated via queue:", data);
-        alert("Call initiated successfully via queue.");
+        console.log("Call initiated to contact:", data);
+        alert("Outbound call started successfully!");
       } catch (err) {
-        console.error("Fetch error:", err);
-        alert("Error placing call. Check console for details.");
+        console.error("Error:", err);
+        alert("Failed to place call. Check console for details.");
       }
     }
 
-    /***************************************************************
-     * 6) Attach Event to the Button
-     ***************************************************************/
-    document.getElementById("callBtn").addEventListener("click", () => {
-      placeCall("+38640132345"); // Replace with the desired phone number
-    });
+    // 6) Update event listener
+    document.getElementById("callBtn").addEventListener("click", placeContactCall);
   </script>
 </body>
 </html>
