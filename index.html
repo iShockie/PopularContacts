@@ -8,7 +8,7 @@
             font-family: Arial, sans-serif;
             margin: 40px;
         }
-        #login-button, #call-button {
+        #call-button {
             padding: 10px 20px;
             font-size: 16px;
             margin: 10px 0;
@@ -19,13 +19,13 @@
             border: 1px solid #ddd;
             background-color: #f9f9f9;
             max-width: 600px;
+            overflow-y: auto;
+            max-height: 300px;
         }
     </style>
 </head>
 <body>
     <h1>Genesys Cloud Call Application</h1>
-    <button id="login-button">Login with Genesys Cloud</button>
-    <br>
     <button id="call-button" disabled>Place Call</button>
 
     <div id="status"></div>
@@ -33,15 +33,14 @@
     <script>
         (function() {
             // Configuration - Replace these with your actual values
-            const CLIENT_ID = 'c6dcc699-08b2-4484-a165-63dcf225e982'; // Replace with your Genesys Cloud OAuth Client ID
-            const REDIRECT_URI = 'https://ishockie.github.io/PopularContacts'; // e.g., 'https://yourdomain.com/callback'
+            const CLIENT_ID = 'YOUR_CLIENT_ID'; // Replace with your Genesys Cloud OAuth Client ID
+            const REDIRECT_URI = 'YOUR_REDIRECT_URI'; // e.g., 'https://yourdomain.com/callback'
             const AUTHORIZATION_URL = 'https://login.mypurecloud.de/oauth/authorize';
             const API_BASE_URL = 'https://api.mypurecloud.de/api/v2';
             const CALL_QUEUE_ID = '477cbe0e-1865-4b06-933b-e81961c3c827'; // Your Queue ID
             const TARGET_PHONE_NUMBER = '+38640132345'; // The number to call
 
             // Elements
-            const loginButton = document.getElementById('login-button');
             const callButton = document.getElementById('call-button');
             const statusDiv = document.getElementById('status');
 
@@ -50,7 +49,7 @@
                 const params = {};
                 const regex = /([^&=]+)=([^&]*)/g;
                 let m;
-                while (m = regex.exec(hash)) {
+                while ((m = regex.exec(hash))) {
                     params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
                 }
                 return params;
@@ -58,8 +57,18 @@
 
             // Function to initiate OAuth implicit grant flow
             function initiateLogin() {
-                const authUrl = `${AUTHORIZATION_URL}?response_type=token&client_id=${encodeURIComponent(CLIENT_ID)}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=xyz&scope=websocket%20calls:edit%20calls:read`;
+                const authUrl = `${AUTHORIZATION_URL}?response_type=token&client_id=${encodeURIComponent(CLIENT_ID)}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${encodeURIComponent(generateState())}&scope=websocket%20calls:edit%20calls:read`;
                 window.location = authUrl;
+            }
+
+            // Function to generate a random state parameter for security
+            function generateState(length = 16) {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
             }
 
             // Function to display status messages
@@ -67,6 +76,8 @@
                 const p = document.createElement('p');
                 p.textContent = message;
                 statusDiv.appendChild(p);
+                // Auto-scroll to the bottom
+                statusDiv.scrollTop = statusDiv.scrollHeight;
             }
 
             // Function to place a call using the Conversations API
@@ -103,9 +114,6 @@
                 }
             }
 
-            // Event listener for login button
-            loginButton.addEventListener('click', initiateLogin);
-
             // Event listener for call button
             callButton.addEventListener('click', () => {
                 if (window.accessToken) {
@@ -115,7 +123,7 @@
                 }
             });
 
-            // On page load, check if redirected back with access token
+            // On page load, handle authentication
             window.onload = function() {
                 if (window.location.hash) {
                     const params = parseHashParams(window.location.hash.substring(1));
@@ -129,6 +137,9 @@
                     } else if (params.error) {
                         updateStatus(`Authentication error: ${params.error_description || params.error}`);
                     }
+                } else {
+                    // No access token present, initiate login automatically
+                    initiateLogin();
                 }
             };
         })();
