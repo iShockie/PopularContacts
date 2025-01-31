@@ -57,7 +57,7 @@
 
             // Function to initiate OAuth implicit grant flow
             function initiateLogin() {
-                const authUrl = `${AUTHORIZATION_URL}?response_type=token&client_id=${encodeURIComponent(CLIENT_ID)}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${encodeURIComponent(generateState())}&scope=websocket%20calls:edit%20calls:read`;
+                const authUrl = `${AUTHORIZATION_URL}?response_type=token&client_id=${encodeURIComponent(CLIENT_ID)}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${encodeURIComponent(generateState())}&scope=conversations:edit%20conversations:read`;
                 window.location = authUrl;
             }
 
