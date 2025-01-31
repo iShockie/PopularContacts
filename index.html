@@ -12,7 +12,7 @@
 
     // Function to initiate the Implicit Grant flow
     function login() {
-      const authUrl = `https://login.mypurecloud.de/oauth/authorize?response_type=token&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
+      const authUrl = `https://login.mypurecloud.com/oauth/authorize?response_type=token&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}`;
       window.location.href = authUrl;
     }
 
