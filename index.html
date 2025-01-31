@@ -45,6 +45,10 @@
 
         if (response.ok) {
           alert('Outbound interaction created successfully!');
+        } else if (response.status === 401) {
+          // Token is invalid or expired, re-authenticate the user
+          alert('Session expired. Please log in again.');
+          login(); // Re-initiate the Implicit Grant flow
         } else {
           const error = await response.json();
           alert(`Failed to create interaction: ${error.message}`);
@@ -65,7 +69,7 @@
   </script>
 </head>
 <body>
-  <h1>Create Outbound Interaction2</h1>
+  <h1>Create Outbound Interaction</h1>
   <button onclick="login()">Login and Create Interaction</button>
 </body>
 </html>
