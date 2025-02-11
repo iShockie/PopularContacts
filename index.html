@@ -133,9 +133,8 @@
       fetchExternalContact()
       .then(contactData => {
         console.log("External contact data received:", contactData);
-        // Assume the contact record has a "phoneNumber" property.
-        // Adjust this if your contact object stores the phone number differently (e.g., in an array).
-        const phoneNumber = contactData.phoneNumber;
+        // Try to extract the phone number from either "phoneNumber" or "e164" property.
+        const phoneNumber = contactData.phoneNumber || contactData.e164;
         if (!phoneNumber) {
           throw new Error("No phone number found for external contact " + externalContactId);
         }
