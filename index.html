@@ -6,13 +6,13 @@
 </head>
 <body>
   <!-- Button to trigger the outbound call -->
-  <button id="vidzvan">Vid Žvan</button>
+  <button id="vidzvan">Vid ZŽvan</button>
 
   <script>
     // -----------------------------
     // OAuth Configuration & Handling
     // -----------------------------
-    const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';  // Your OAuth client ID
+    const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982'; // Your OAuth client ID
     const redirectUriValue = "https://ishockie.github.io/PopularContacts/"; // Must exactly match your configured URI
     const redirectUri = encodeURIComponent(redirectUriValue);
     const state = "abc123"; // Optional state parameter
@@ -61,8 +61,8 @@
     // External Contact & Outbound Call Configuration
     // -----------------------------
     const externalContactId = "791a605b-7948-4e5a-94e6-5b670054a781";
-    const callFromQueueId = "477cbe0e-1865-4b06-933b-e81961c3c827";  // Outbound call queue ID
-    const callerId = "+38628216565";  // Outbound caller ID
+    const callFromQueueId = "477cbe0e-1865-4b06-933b-e81961c3c827"; // Outbound call queue ID
+    const callerId = "+38628216565"; // Outbound caller ID
 
     // -----------------------------
     // Functions
@@ -88,7 +88,7 @@
       });
     }
 
-    // Trigger the outbound call using the external contact's phone number
+    // Trigger the outbound call using the external contact's work phone number
     function triggerCallWithPhone(phoneNumber) {
       // Genesys Cloud API endpoint for placing a call
       const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
@@ -97,12 +97,12 @@
       // We include both minimal parameters and a non-empty "destinations" array.
       const payload = {
         callFromQueueId: callFromQueueId,
-        phoneNumber: phoneNumber,                // Minimal parameter (the destination number)
+        phoneNumber: phoneNumber, // Minimal parameter (the destination number)
         callerId: callerId,
-        externalContactId: externalContactId,      // Include the external contact ID for reference
+        externalContactId: externalContactId, // Reference to the external contact
         destinations: [
           {
-            address: phoneNumber,                // Destination number inside destinations array
+            address: phoneNumber, // Destination number inside destinations array
             addressType: "phone"
           }
         ]
@@ -133,12 +133,12 @@
       fetchExternalContact()
       .then(contactData => {
         console.log("External contact data received:", contactData);
-        // Try to extract the phone number from either "phoneNumber" or "e164" property.
-        const phoneNumber = contactData.phoneNumber || contactData.e164;
+        // Always use the workPhone.e164 as the primary phone number.
+        const phoneNumber = (contactData.workPhone && contactData.workPhone.e164) || null;
         if (!phoneNumber) {
-          throw new Error("No phone number found for external contact " + externalContactId);
+          throw new Error("No work phone number found for external contact " + externalContactId);
         }
-        console.log("Using phone number:", phoneNumber, "for outbound call.");
+        console.log("Using work phone number:", phoneNumber, "for outbound call.");
         return triggerCallWithPhone(phoneNumber);
       })
       .then(callData => {
