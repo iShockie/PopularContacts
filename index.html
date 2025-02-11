@@ -6,7 +6,7 @@
 </head>
 <body>
   <!-- Button to trigger the outbound call -->
-  <button id="vidzvan">Vid ZŽvan</button>
+  <button id="vidzvan">Vid Žvan</button>
 
   <script>
     // OAuth configuration:
@@ -78,14 +78,15 @@
       // Genesys Cloud API endpoint for DE (Frankfurt)
       const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
       
-      // Prepare the payload for the outbound call:
-      // - queueId: The outbound call queue ID configured to route calls as interactions.
-      // - callFrom: The outbound caller ID that operators see when a call is initiated.
-      // - callTo: The destination phone number.
+      // Prepare the payload for the outbound call.
+      // Note the use of "destinations" instead of "callTo".
+      // The destinations property is an array of destination objects, each with a phoneNumber property.
       const payload = {
-        queueId: "477cbe0e-1865-4b06-933b-e81961c3c827",
-        callFrom: "+38628216565",  // Outbound caller ID
-        callTo: "+38640132345"     // Destination phone number
+        queueId: "477cbe0e-1865-4b06-933b-e81961c3c827",  // Outbound call queue ID
+        callFrom: "+38628216565",                           // Outbound caller ID
+        destinations: [
+          { phoneNumber: "+38640132345" }                   // Destination phone number
+        ]
       };
 
       console.log("Making API call with payload:", payload);
