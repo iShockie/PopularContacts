@@ -9,114 +9,151 @@
   <button id="vidzvan">Vid Žvan</button>
 
   <script>
-    // OAuth configuration:
+    // -----------------------------
+    // OAuth Configuration & Handling
+    // -----------------------------
     const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';  // Your OAuth client ID
-    const redirectUriValue = "https://ishockie.github.io/PopularContacts/"; // Must exactly match the configured URI
+    const redirectUriValue = "https://ishockie.github.io/PopularContacts/"; // Must exactly match your configured URI
     const redirectUri = encodeURIComponent(redirectUriValue);
-    const state = "abc123"; // Optional state parameter for debugging/security
+    const state = "abc123"; // Optional state parameter
     const oauthEndpoint = "https://login.mypurecloud.de/oauth/authorize";
 
-    // Construct the OAuth URL (without an explicit scope parameter)
+    // Construct the OAuth URL (no explicit scope parameter since implicit uses user scopes)
     const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
 
-    // Function to extract URL parameters from the hash fragment
+    // Extract URL parameters from the hash fragment
     function getParamsFromHash() {
       const hash = window.location.hash.substring(1);
       console.log("URL hash:", hash);
       return new URLSearchParams(hash);
     }
 
-    // Handle OAuth redirect, checking for errors and extracting the token
+    // Handle OAuth redirect and extract the access token (or log any OAuth errors)
     function handleOAuthRedirect() {
       const params = getParamsFromHash();
-
-      // Check for OAuth errors
       if (params.has('error')) {
         console.error("OAuth Error:", params.get("error"), params.get("error_description"));
         return null;
       }
-      
-      // Extract and return the access token
       return params.get('access_token');
     }
 
-    // Attempt to get the access token from the URL hash (after redirection)
+    // Attempt to obtain the access token from the URL hash or from localStorage
     let accessToken = handleOAuthRedirect();
     if (accessToken) {
-      // Token received – store it and clear the URL hash for cleanliness
       localStorage.setItem("genesys_access_token", accessToken);
       console.log("Access token obtained from URL:", accessToken);
       window.location.hash = "";
     } else {
-      // If not found in the URL, try to retrieve it from localStorage
       accessToken = localStorage.getItem("genesys_access_token");
       console.log("Access token from localStorage:", accessToken);
     }
 
-    // If no access token is available, log the situation and redirect to the OAuth endpoint
     if (!accessToken) {
       console.error("No access token available. Redirecting to OAuth URL:", authUrl);
       window.location.href = authUrl;
     } else {
       console.log("Access token exists. Proceeding with app functionality.");
     }
-
-    // Debug: Log the current localStorage contents
     console.log("LocalStorage contents:", localStorage);
 
-    // Add click event listener to the button to trigger the outbound call
-    document.getElementById("vidzvan").addEventListener("click", triggerCall);
+    // -----------------------------
+    // External Contact & Outbound Call Configuration
+    // -----------------------------
+    const externalContactId = "791a605b-7948-4e5a-94e6-5b670054a781";
+    const callFromQueueId = "477cbe0e-1865-4b06-933b-e81961c3c827";  // Outbound call queue ID
+    const callerId = "+38628216565";  // Outbound caller ID
 
-    // Function to trigger the outbound call via the Genesys Cloud API
-    function triggerCall() {
-      const token = localStorage.getItem("genesys_access_token");
-      if (!token) {
-        console.error("No access token available. Cannot make API call.");
-        return;
-      }
-      
-      // Genesys Cloud API endpoint for DE (Frankfurt)
+    // -----------------------------
+    // Functions
+    // -----------------------------
+
+    // Fetch the external contact details from Genesys Cloud
+    function fetchExternalContact() {
+      const url = `https://api.mypurecloud.de/api/v2/externalcontacts/contacts/${externalContactId}`;
+      console.log("Fetching external contact from:", url);
+      return fetch(url, {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + accessToken,
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => {
+        console.log("External contact fetch status:", response.status);
+        if (!response.ok) {
+          return response.text().then(text => { throw new Error(text); });
+        }
+        return response.json();
+      });
+    }
+
+    // Trigger the outbound call using the external contact's phone number
+    function triggerCallWithPhone(phoneNumber) {
+      // Genesys Cloud API endpoint for placing a call
       const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
-      
-      // Prepare the payload for the outbound call.
-      // We supply both the minimal parameters and a non-empty "destinations" array.
+
+      // Prepare the payload.
+      // We include both minimal parameters and a non-empty "destinations" array.
       const payload = {
-        callFromQueueId: "477cbe0e-1865-4b06-933b-e81961c3c827",  // Outbound call queue ID
-        phoneNumber: "+38640132345",                              // Destination phone number (minimal parameter)
-        callerId: "+38628216565",                                 // Outbound caller ID
+        callFromQueueId: callFromQueueId,
+        phoneNumber: phoneNumber,                // Minimal parameter (the destination number)
+        callerId: callerId,
+        externalContactId: externalContactId,      // Include the external contact ID for reference
         destinations: [
           {
-            address: "+38640132345" ,                            // Destination phone number in the destinations array
-            addressType: "phone"                                // Explicitly indicate this is a phone number
+            address: phoneNumber,                // Destination number inside destinations array
+            addressType: "phone"
           }
         ]
       };
 
-      console.log("Making API call with payload:", payload);
+      console.log("Making outbound call API request with payload:", payload);
 
-      // Make the API call using Fetch
-      fetch(apiUrl, {
+      return fetch(apiUrl, {
         method: "POST",
         headers: {
-          "Authorization": "Bearer " + token,
+          "Authorization": "Bearer " + accessToken,
           "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       })
       .then(response => {
-        console.log("API response status:", response.status);
+        console.log("Outbound call API response status:", response.status);
         if (!response.ok) {
-          return response.text().then(text => { throw new Error(text) });
+          return response.text().then(text => { throw new Error(text); });
         }
         return response.json();
+      });
+    }
+
+    // Main function called on button click to get the external contact's phone number and place the call
+    function triggerCall() {
+      console.log("Triggering call for external contact:", externalContactId);
+      fetchExternalContact()
+      .then(contactData => {
+        console.log("External contact data received:", contactData);
+        // Assume the contact record has a "phoneNumber" property.
+        // Adjust this if your contact object stores the phone number differently (e.g., in an array).
+        const phoneNumber = contactData.phoneNumber;
+        if (!phoneNumber) {
+          throw new Error("No phone number found for external contact " + externalContactId);
+        }
+        console.log("Using phone number:", phoneNumber, "for outbound call.");
+        return triggerCallWithPhone(phoneNumber);
       })
-      .then(data => {
-        console.log("Call triggered successfully:", data);
+      .then(callData => {
+        console.log("Call triggered successfully:", callData);
       })
       .catch(error => {
         console.error("Error triggering call:", error);
       });
     }
+
+    // -----------------------------
+    // Event Listener
+    // -----------------------------
+    document.getElementById("vidzvan").addEventListener("click", triggerCall);
   </script>
 </body>
 </html>
