@@ -9,14 +9,18 @@
   <button id="vidzvan">Vid Žvan</button>
 
   <script>
+    // OAuth configuration:
     // Replace with your actual OAuth client ID from Genesys Cloud
     const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';
     // Hard-coded redirect URI; ensure this exactly matches the one registered in Genesys Cloud
     const redirectUri = encodeURIComponent("https://ishockie.github.io/PopularContacts/");
-    // Set the required OAuth scope; adjust if needed
-    const scope = encodeURIComponent("conversation:write");
+    // Optional state parameter for debugging and security (arbitrary value)
+    const state = "abc123";
     // Genesys Cloud DE (Frankfurt) OAuth endpoint
     const oauthEndpoint = "https://login.mypurecloud.de/oauth/authorize";
+
+    // Construct the full OAuth URL without the scope parameter
+    const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
 
     // Function to extract the access token from the URL fragment after OAuth redirect
     function getAccessTokenFromHash() {
@@ -26,10 +30,10 @@
       return params.get('access_token');
     }
 
-    // Try to get the access token from the URL hash
+    // Try to get the access token from the URL hash (after redirection)
     let accessToken = getAccessTokenFromHash();
     if (accessToken) {
-      // Store the token in localStorage and clear the hash for cleanliness
+      // Store the token in localStorage and clear the URL hash for cleanliness
       localStorage.setItem("genesys_access_token", accessToken);
       console.log("Access token obtained from URL:", accessToken);
       window.location.hash = "";
@@ -39,9 +43,6 @@
       console.log("Access token from localStorage:", accessToken);
     }
 
-    // Construct the full OAuth URL for redirection
-    const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
-    
     // If no access token is available, redirect to the OAuth endpoint
     if (!accessToken) {
       console.log("No access token available. Redirecting to OAuth URL:", authUrl);
@@ -50,14 +51,14 @@
       console.log("Access token exists. Proceeding with app functionality.");
     }
 
-    // Add a click event listener to the button to trigger the outbound call
+    // Add click event listener to the button to trigger the outbound call
     document.getElementById("vidzvan").addEventListener("click", triggerCall);
 
     // Function to trigger the outbound call via the Genesys Cloud API
     function triggerCall() {
       const token = localStorage.getItem("genesys_access_token");
       if (!token) {
-        console.error("No access token available. Unable to make API call.");
+        console.error("No access token available. Cannot make API call.");
         return;
       }
       
@@ -70,7 +71,7 @@
         phoneNumber: "+38640132345"                         // The destination phone number
       };
 
-      // Make the API call using the Fetch API
+      // Make the API call using Fetch
       fetch(apiUrl, {
         method: "POST",
         headers: {
