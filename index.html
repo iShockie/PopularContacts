@@ -5,66 +5,67 @@
   <title>Genesys Cloud Outbound Call Integration</title>
 </head>
 <body>
-  <!-- Button that will trigger the outbound call -->
-  <button id="vidzvan">Vid van</button>
+  <!-- Button to trigger the outbound call -->
+  <button id="vidzvan">Vid Žvan</button>
 
   <script>
-    // Helper: Extract access token from URL fragment (if present)
+    // Replace with your actual OAuth client ID from Genesys Cloud
+    const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';
+    // Use the hard-coded redirect URI as registered in your Genesys Cloud OAuth client
+    const redirectUri = encodeURIComponent("https://ishockie.github.io/PopularContacts/");
+    // Set the required OAuth scope; adjust if needed
+    const scope = encodeURIComponent("conversation:write");
+    // Genesys Cloud DE (Frankfurt) OAuth endpoint
+    const oauthEndpoint = "https://login.mypurecloud.de/oauth/authorize";
+
+    // Function to extract access token from the URL fragment after OAuth redirect
     function getAccessTokenFromHash() {
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
       return params.get('access_token');
     }
 
-    // Check for access token in URL or in localStorage
+    // Check if access token is available from the URL or localStorage
     let accessToken = getAccessTokenFromHash();
     if (accessToken) {
-      localStorage.setItem('genesys_access_token', accessToken);
-      // Optionally, remove token details from URL for cleanliness
-      window.location.hash = '';
+      localStorage.setItem("genesys_access_token", accessToken);
+      // Optionally, remove the token from the URL for cleanliness
+      window.location.hash = "";
     } else {
-      accessToken = localStorage.getItem('genesys_access_token');
+      accessToken = localStorage.getItem("genesys_access_token");
     }
 
-    // If no access token, redirect to Genesys Cloud OAuth authorization endpoint
+    // If no access token is found, redirect to the Genesys Cloud OAuth endpoint
     if (!accessToken) {
-      const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982'; // Replace with your OAuth client ID
-      const redirectUri = encodeURIComponent(window.location.href);
-      // Adjust the scope string as required (e.g., conversation:write)
-      const scope = encodeURIComponent('conversation:write');
-      const authUrl = `https://login.mypurecloud.de/oauth/authorize?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+      const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
       window.location.href = authUrl;
     }
 
-    // Add click handler for the button
-    document.getElementById('vidzvan').addEventListener('click', triggerCall);
+    // Add a click event listener to the button to trigger the outbound call
+    document.getElementById("vidzvan").addEventListener("click", triggerCall);
 
-    // Function that triggers the outbound call
     function triggerCall() {
-      const token = localStorage.getItem('genesys_access_token');
+      const token = localStorage.getItem("genesys_access_token");
       if (!token) {
         console.error("No access token available.");
         return;
       }
-
-      // Genesys Cloud API endpoint for the DE (Frankfurt) region.
-      // (Double-check the endpoint for your integration; this is typically the DE endpoint.)
-      const apiUrl = 'https://api.mypurecloud.de/api/v2/conversations/calls';
-
-      // Prepare the payload.
-      // Depending on your Genesys Cloud configuration and API version, the payload may require
-      // additional fields (like a caller ID, callFrom, etc.). Consult the API docs.
+      
+      // Genesys Cloud API endpoint for DE (Frankfurt)
+      const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
+      
+      // Prepare the payload for the outbound call
       const payload = {
         queueId: "477cbe0e-1865-4b06-933b-e81961c3c827",  // Your outbound call queue ID
         phoneNumber: "+38640132345"                         // The destination phone number
       };
 
-      // Make the POST request using the Fetch API
+      // Make the API call using Fetch
       fetch(apiUrl, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json'
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
       })
