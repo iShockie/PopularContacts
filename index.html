@@ -11,39 +11,52 @@
   <script>
     // Replace with your actual OAuth client ID from Genesys Cloud
     const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';
-    // Use the hard-coded redirect URI as registered in your Genesys Cloud OAuth client
-    const redirectUri = encodeURIComponent("https://ishockie.github.io/PopularContacts/");
+    // Hard-coded redirect URI; ensure this exactly matches the one registered in Genesys Cloud
+    const redirectUri = encodeURIComponent("https://ishockie.github.io/PopularContacts");
     // Set the required OAuth scope; adjust if needed
     const scope = encodeURIComponent("conversation:write");
     // Genesys Cloud DE (Frankfurt) OAuth endpoint
     const oauthEndpoint = "https://login.mypurecloud.de/oauth/authorize";
 
-    // Function to extract access token from the URL fragment after OAuth redirect
+    // Function to extract the access token from the URL fragment after OAuth redirect
     function getAccessTokenFromHash() {
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
       return params.get('access_token');
     }
 
-    // Check if access token is available from the URL or localStorage
+    // Try to get the access token from the URL hash or from localStorage
     let accessToken = getAccessTokenFromHash();
     if (accessToken) {
+      // Store the token in localStorage and clear the hash for cleanliness
       localStorage.setItem("genesys_access_token", accessToken);
-      // Optionally, remove the token from the URL for cleanliness
       window.location.hash = "";
+      // Clear the redirect flag since we now have a token
+      localStorage.removeItem("oauthAttempted");
     } else {
+      // If not found in the URL, try localStorage
       accessToken = localStorage.getItem("genesys_access_token");
     }
 
-    // If no access token is found, redirect to the Genesys Cloud OAuth endpoint
+    // Construct the full OAuth URL
+    const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+
+    // If no access token is available, check if we've already attempted to get one
     if (!accessToken) {
-      const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
-      window.location.href = authUrl;
+      if (!localStorage.getItem('oauthAttempted')) {
+        // Set a flag to indicate an OAuth attempt has been made, then redirect
+        localStorage.setItem('oauthAttempted', 'true');
+        window.location.href = authUrl;
+      } else {
+        // If the flag is already set, stop redirecting and log an error
+        console.error("OAuth redirect loop detected. Check your configuration.");
+      }
     }
 
-    // Add a click event listener to the button to trigger the outbound call
+    // Add click event listener to the button to trigger the outbound call
     document.getElementById("vidzvan").addEventListener("click", triggerCall);
 
+    // Function to trigger the outbound call via the Genesys Cloud API
     function triggerCall() {
       const token = localStorage.getItem("genesys_access_token");
       if (!token) {
