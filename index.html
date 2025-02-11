@@ -78,11 +78,18 @@
       // Genesys Cloud API endpoint for DE (Frankfurt)
       const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
       
-      // Prepare the payload for the outbound call using the minimal parameters:
+      // Prepare the payload for the outbound call.
+      // We supply both the minimal parameters and a non-empty "destinations" array.
       const payload = {
-        callFromQueueId: "477cbe0e-1865-4b06-933b-e81961c3c827", // Outbound call queue ID
-        phoneNumber: "+38640132345",                              // Destination phone number
-        callerId: "+38628216565"                                  // Outbound caller ID
+        callFromQueueId: "477cbe0e-1865-4b06-933b-e81961c3c827",  // Outbound call queue ID
+        phoneNumber: "+38640132345",                              // Destination phone number (minimal parameter)
+        callerId: "+38628216565",                                 // Outbound caller ID
+        destinations: [
+          {
+            address: "+38640132345" ,                            // Destination phone number in the destinations array
+            addressType: "phone"                                // Explicitly indicate this is a phone number
+          }
+        ]
       };
 
       console.log("Making API call with payload:", payload);
