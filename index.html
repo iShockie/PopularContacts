@@ -6,7 +6,7 @@
 </head>
 <body>
   <!-- Button to trigger the outbound call -->
-  <button id="vidzvan">Vid ZŽvan</button>
+  <button id="vidzvan">Vid Žvan</button>
 
   <script>
     // OAuth configuration:
@@ -79,14 +79,13 @@
       const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
       
       // Prepare the payload for the outbound call.
-      // Note: Instead of "callTo", we now use "destinations" with an object that has "address" and "addressType".
+      // Note: The "destinations" property is an array containing at least one object with an "address" property.
       const payload = {
         queueId: "477cbe0e-1865-4b06-933b-e81961c3c827",  // Outbound call queue ID
         callFrom: "+38628216565",                           // Outbound caller ID
         destinations: [
           { 
-            address: "+38640132345",   // Destination phone number
-            addressType: "phone"       // Indicates that the address is a phone number
+            address: "+38640132345"   // Destination phone number
           }
         ]
       };
