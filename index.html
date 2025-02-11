@@ -6,7 +6,7 @@
 </head>
 <body>
   <!-- Button that will trigger the outbound call -->
-  <button id="vidzvan">Vid Žvan</button>
+  <button id="vidzvan">Vid van</button>
 
   <script>
     // Helper: Extract access token from URL fragment (if present)
@@ -28,7 +28,7 @@
 
     // If no access token, redirect to Genesys Cloud OAuth authorization endpoint
     if (!accessToken) {
-      const clientId = 'YOUR_CLIENT_ID'; // Replace with your OAuth client ID
+      const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982'; // Replace with your OAuth client ID
       const redirectUri = encodeURIComponent(window.location.href);
       // Adjust the scope string as required (e.g., conversation:write)
       const scope = encodeURIComponent('conversation:write');
