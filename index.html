@@ -6,34 +6,44 @@
 </head>
 <body>
   <!-- Button to trigger the outbound call -->
-  <button id="vidzvan">Vid Žvan</button>
+  <button id="vidzvan">Vid ZŽvan</button>
 
   <script>
     // OAuth configuration:
-    // Replace with your actual OAuth client ID from Genesys Cloud
-    const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';
-    // Hard-coded redirect URI; ensure this exactly matches the one registered in Genesys Cloud
-    const redirectUri = encodeURIComponent("https://ishockie.github.io/PopularContacts/");
-    // Optional state parameter for debugging and security (arbitrary value)
-    const state = "abc123";
-    // Genesys Cloud DE (Frankfurt) OAuth endpoint
+    const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';  // Your OAuth client ID
+    const redirectUriValue = "https://ishockie.github.io/PopularContacts/"; // Must exactly match the configured URI
+    const redirectUri = encodeURIComponent(redirectUriValue);
+    const state = "abc123"; // Optional state parameter for debugging/security
     const oauthEndpoint = "https://login.mypurecloud.de/oauth/authorize";
 
-    // Construct the full OAuth URL without the scope parameter
+    // Construct the OAuth URL (without an explicit scope parameter)
     const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
 
-    // Function to extract the access token from the URL fragment after OAuth redirect
-    function getAccessTokenFromHash() {
+    // Function to extract URL parameters from the hash fragment
+    function getParamsFromHash() {
       const hash = window.location.hash.substring(1);
       console.log("URL hash:", hash);
-      const params = new URLSearchParams(hash);
+      return new URLSearchParams(hash);
+    }
+
+    // Handle OAuth redirect, checking for errors and extracting the token
+    function handleOAuthRedirect() {
+      const params = getParamsFromHash();
+
+      // Check for OAuth errors
+      if (params.has('error')) {
+        console.error("OAuth Error:", params.get("error"), params.get("error_description"));
+        return null;
+      }
+      
+      // Extract and return the access token
       return params.get('access_token');
     }
 
-    // Try to get the access token from the URL hash (after redirection)
-    let accessToken = getAccessTokenFromHash();
+    // Attempt to get the access token from the URL hash (after redirection)
+    let accessToken = handleOAuthRedirect();
     if (accessToken) {
-      // Store the token in localStorage and clear the URL hash for cleanliness
+      // Token received – store it and clear the URL hash for cleanliness
       localStorage.setItem("genesys_access_token", accessToken);
       console.log("Access token obtained from URL:", accessToken);
       window.location.hash = "";
@@ -43,13 +53,16 @@
       console.log("Access token from localStorage:", accessToken);
     }
 
-    // If no access token is available, redirect to the OAuth endpoint
+    // If no access token is available, log the situation and redirect to the OAuth endpoint
     if (!accessToken) {
-      console.log("No access token available. Redirecting to OAuth URL:", authUrl);
+      console.error("No access token available. Redirecting to OAuth URL:", authUrl);
       window.location.href = authUrl;
     } else {
       console.log("Access token exists. Proceeding with app functionality.");
     }
+
+    // Debug: Log the current localStorage contents
+    console.log("LocalStorage contents:", localStorage);
 
     // Add click event listener to the button to trigger the outbound call
     document.getElementById("vidzvan").addEventListener("click", triggerCall);
@@ -65,11 +78,17 @@
       // Genesys Cloud API endpoint for DE (Frankfurt)
       const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
       
-      // Prepare the payload for the outbound call
+      // Prepare the payload for the outbound call:
+      // - queueId: The outbound call queue ID configured to route calls as interactions.
+      // - callFrom: The outbound caller ID that operators see when a call is initiated.
+      // - callTo: The destination phone number.
       const payload = {
-        queueId: "477cbe0e-1865-4b06-933b-e81961c3c827",  // Your outbound call queue ID
-        phoneNumber: "+38640132345"                         // The destination phone number
+        queueId: "477cbe0e-1865-4b06-933b-e81961c3c827",
+        callFrom: "+38628216565",  // Outbound caller ID
+        callTo: "+38640132345"     // Destination phone number
       };
+
+      console.log("Making API call with payload:", payload);
 
       // Make the API call using Fetch
       fetch(apiUrl, {
@@ -81,6 +100,7 @@
         body: JSON.stringify(payload)
       })
       .then(response => {
+        console.log("API response status:", response.status);
         if (!response.ok) {
           return response.text().then(text => { throw new Error(text) });
         }
