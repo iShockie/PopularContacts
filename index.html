@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Genesys Cloud - Contact Dialer</title>
+  <title>Genesys Cloud - Prioritete Dialer</title>
   <style>
-    /* Reset some default styling */
+    /* Reset & Base Styles */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -16,44 +16,67 @@
       color: #333;
       padding: 20px;
     }
-    h2 {
+    h1 {
       text-align: center;
       margin-bottom: 20px;
     }
+    /* Container for the two sections */
+    .sections-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .prioritete-section {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      flex: 1;
+      min-width: 300px;
+    }
+    .prioritete-section h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #0073e6;
+    }
+    /* Columns within each section */
     .columns {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 40px;
+      gap: 10px;
     }
     .column {
-      background: #fff;
-      border-radius: 8px;
-      padding: 15px;
+      background: #fafafa;
+      border-radius: 5px;
+      padding: 10px;
       flex: 1;
-      margin: 0 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-    .column h2 {
+    .column h3 {
       text-align: center;
-      margin-bottom: 15px;
-      color: #0073e6;
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #444;
     }
     .contact-button {
       display: block;
       width: 100%;
-      margin: 8px 0;
-      padding: 10px;
+      margin: 5px 0;
+      padding: 8px;
       border: none;
       border-radius: 5px;
       background: #0073e6;
       color: #fff;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
     .contact-button:hover {
       background: #005bb5;
     }
+    /* Test Button at the bottom */
     #test-button {
       display: block;
       margin: 30px auto 0;
@@ -72,22 +95,40 @@
   </style>
 </head>
 <body>
-  <h2>RSA Prioritete</h2>
-  <div class="columns">
-    <div class="column" id="ljubljana-column">
-      <h2>Ljubljana</h2>
-      <!-- Ljubljana contacts will be injected here -->
+  <h1>Prioritete Dialer</h1>
+  <div class="sections-container">
+    <!-- RSA Prioritete Section -->
+    <div class="prioritete-section" id="rsa-section">
+      <h2>RSA Prioritete</h2>
+      <div class="columns">
+        <div class="column" id="rsa-ljubljana-column">
+          <h3>Ljubljana</h3>
+        </div>
+        <div class="column" id="rsa-koper-column">
+          <h3>Koper</h3>
+        </div>
+        <div class="column" id="rsa-maribor-column">
+          <h3>Maribor</h3>
+        </div>
+      </div>
     </div>
-    <div class="column" id="koper-column">
-      <h2>Koper</h2>
-      <!-- Koper contacts will be injected here -->
-    </div>
-    <div class="column" id="maribor-column">
-      <h2>Maribor</h2>
-      <!-- Maribor contacts will be injected here -->
+    <!-- RC Prioritete Section -->
+    <div class="prioritete-section" id="rc-section">
+      <h2>RC Prioritete</h2>
+      <div class="columns">
+        <div class="column" id="rc-ljubljana-column">
+          <h3>Ljubljana</h3>
+        </div>
+        <div class="column" id="rc-koper-column">
+          <h3>Koper</h3>
+        </div>
+        <div class="column" id="rc-maribor-column">
+          <h3>Maribor</h3>
+        </div>
+      </div>
     </div>
   </div>
-  <!-- Test button (Vid Žvan) placed at the bottom -->
+  <!-- Test Button (Vid Žvan) -->
   <button id="test-button">Vid Žvan (Test)</button>
 
   <script>
@@ -101,7 +142,6 @@
     const oauthEndpoint = "https://login.mypurecloud.de/oauth/authorize";
     const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
 
-    // Retrieve access token via implicit grant
     function getParamsFromHash() {
       const hash = window.location.hash.substring(1);
       return new URLSearchParams(hash);
@@ -132,48 +172,60 @@
     const callFromQueueId = "477cbe0e-1865-4b06-933b-e81961c3c827";
     const callerId = "+38628216565";
 
-    /***********************************
-     * Contact Data for Each Column    *
-     ***********************************/
-    let ljubljanaContacts = [
+    /********************************************
+     * Contact Data (Original Order for RC)     *
+     ********************************************/
+    const originalLjubljanaContacts = [
       { label: "Jerneja Kopitar", id: "6f4a014e-f682-476a-9918-dc38a0f8cc7d" },
       { label: "Avto Primožič", id: "338778a9-4b68-4cd0-ad40-89e92d51afca" },
-      { label: "OPA Avtoturing", id: "e77faf7c-3b32-4715-af27-1d08cce00b64" },
+      { label: "OPA Avtoturin", id: "e77faf7c-3b32-4715-af27-1d08cce00b64" },
       { label: "SOS Soldat", id: "6063dd44-ca3c-41f1-8348-02dde9aea7fa" },
       { label: "Avtovleka Šučur", id: "2e8dac1e-d11b-4dcb-b9cf-d675b4a0e9b8" },
       { label: "WRC Avtovleka", id: "71175553-2f32-4f79-8e74-0eafed8582b6" },
       { label: "Matjaž Pavčnik", id: "d008e1b7-d0d8-4bbd-b389-7dd963ed10c0" },
       { label: "Potočnik", id: "b228cfaf-feaf-4062-915a-893cb4f91ff2" }
     ];
-    let koperContacts = [
+    const originalKoperContacts = [
       { label: "Avtovleka Pajr", id: "2cb9ed91-ab14-4b67-8488-eda9c39d1532" },
       { label: "Gregorič", id: "5a772fb1-4e0d-4e85-81d2-02312af64f78" },
       { label: "Avto Martinčič", id: "d03bf6df-26f0-40ae-a2b8-ec28e5dafc9c" },
       { label: "Avtovleka Rustja", id: "0267e76c-2899-4c76-843c-150b3b8f21a6" }
     ];
-    let mariborContacts = [
+    const originalMariborContacts = [
       { label: "TopTim", id: "37f3bc90-70a4-47c8-8c46-88dccd00b134" },
       { label: "Avto Ketiš", id: "a3f32ab5-d68d-4a1d-b9e3-858d42cb56d8" },
       { label: "Avto Hudin", id: "bd6e6ec7-54e6-407f-8993-43f0a80441d0" }
     ];
 
+    /***********************************************
+     * Create RSA Contact Arrays (Deep Copies)     *
+     ***********************************************/
+    // Use JSON methods for a deep clone since our arrays contain only plain objects.
+    const rsaLjubljanaContacts = JSON.parse(JSON.stringify(originalLjubljanaContacts));
+    const rsaKoperContacts = JSON.parse(JSON.stringify(originalKoperContacts));
+    const rsaMariborContacts = JSON.parse(JSON.stringify(originalMariborContacts));
+
     /*****************************************
-     * Daily Swap Logic (Toggle Based on Day) *
+     * Daily Swap Logic for RSA Section Only *
      *****************************************/
     const dayToggle = Math.floor(Date.now() / 86400000) % 2; // 0 or 1
     if(dayToggle === 0) {
-      // For Ljubljana, swap contacts 2 & 3 (indexes 1 and 2)
-      [ljubljanaContacts[1], ljubljanaContacts[2]] = [ljubljanaContacts[2], ljubljanaContacts[1]];
-      // For Koper, swap contacts 2 & 3 (indexes 1 and 2)
-      [koperContacts[1], koperContacts[2]] = [koperContacts[2], koperContacts[1]];
-      // For Maribor, swap contacts 1 & 2 (indexes 0 and 1)
-      [mariborContacts[0], mariborContacts[1]] = [mariborContacts[1], mariborContacts[0]];
+      // For Ljubljana (RSA), swap contacts 2 & 3 (indexes 1 and 2)
+      [rsaLjubljanaContacts[1], rsaLjubljanaContacts[2]] = [rsaLjubljanaContacts[2], rsaLjubljanaContacts[1]];
+      // For Koper (RSA), swap contacts 2 & 3 (indexes 1 and 2)
+      [rsaKoperContacts[1], rsaKoperContacts[2]] = [rsaKoperContacts[2], rsaKoperContacts[1]];
+      // For Maribor (RSA), swap contacts 1 & 2 (indexes 0 and 1)
+      [rsaMariborContacts[0], rsaMariborContacts[1]] = [rsaMariborContacts[1], rsaMariborContacts[0]];
     }
+    // RC will use the original order.
 
-    /*****************************************
-     * Render Contact Buttons in Each Column *
-     *****************************************/
-    function renderContacts() {
+    /******************************************************
+     * Render Contact Buttons for a Section               *
+     * The function takes a prefix to target the correct   *
+     * container IDs (e.g., "rsa-" or "rc-") and arrays for   *
+     * Ljubljana, Koper, and Maribor contacts.               *
+     ******************************************************/
+    function renderContacts(prefix, ljContacts, koContacts, maContacts) {
       function createButton(contact) {
         const btn = document.createElement("button");
         btn.className = "contact-button";
@@ -185,27 +237,29 @@
         return btn;
       }
       // Render Ljubljana column
-      const ljubljanaDiv = document.getElementById("ljubljana-column");
-      ljubljanaContacts.forEach(contact => {
-        ljubljanaDiv.appendChild(createButton(contact));
+      const ljCol = document.getElementById(prefix + "ljubljana-column");
+      ljContacts.forEach(contact => {
+        ljCol.appendChild(createButton(contact));
       });
       // Render Koper column
-      const koperDiv = document.getElementById("koper-column");
-      koperContacts.forEach(contact => {
-        koperDiv.appendChild(createButton(contact));
+      const koCol = document.getElementById(prefix + "koper-column");
+      koContacts.forEach(contact => {
+        koCol.appendChild(createButton(contact));
       });
       // Render Maribor column
-      const mariborDiv = document.getElementById("maribor-column");
-      mariborContacts.forEach(contact => {
-        mariborDiv.appendChild(createButton(contact));
+      const maCol = document.getElementById(prefix + "maribor-column");
+      maContacts.forEach(contact => {
+        maCol.appendChild(createButton(contact));
       });
     }
-    renderContacts();
+    // Render RSA Prioritete section using swapped arrays
+    renderContacts("rsa-", rsaLjubljanaContacts, rsaKoperContacts, rsaMariborContacts);
+    // Render RC Prioritete section using original arrays
+    renderContacts("rc-", originalLjubljanaContacts, originalKoperContacts, originalMariborContacts);
 
-    /*****************************************
-     * Genesys Cloud API Calls (Common)      *
-     *****************************************/
-    // Fetch external contact details by contact ID
+    /******************************************************
+     * Genesys Cloud API Calls & Contact Outbound Functions *
+     ******************************************************/
     function fetchExternalContact(contactId) {
       const url = `https://api.mypurecloud.de/api/v2/externalcontacts/contacts/${contactId}`;
       console.log("Fetching external contact from:", url);
@@ -223,7 +277,6 @@
         return response.json();
       });
     }
-    // Place an outbound call using the contact's work phone (primary)
     function triggerCallWithPhone(phoneNumber, contactId) {
       const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
       const payload = {
@@ -255,12 +308,10 @@
         return response.json();
       });
     }
-    // Trigger call for a given external contact
     function triggerCallForContact(contactId) {
       console.log("Triggering call for contact:", contactId);
       fetchExternalContact(contactId)
       .then(contactData => {
-        // Use workPhone.e164 as the primary phone number
         const phoneNumber = (contactData.workPhone && contactData.workPhone.e164) || null;
         if (!phoneNumber) {
           throw new Error("No work phone number found for external contact " + contactId);
@@ -279,7 +330,7 @@
     /*****************************************
      * Test Button (Vid Žvan) Handler        *
      *****************************************/
-    // Use external contact ID for Vid Žvan (for testing)
+    // Test button uses a specific external contact (Vid Žvan)
     const vidZvanContactId = "791a605b-7948-4e5a-94e6-5b670054a781";
     document.getElementById("test-button").addEventListener("click", function() {
       triggerCallForContact(vidZvanContactId);
