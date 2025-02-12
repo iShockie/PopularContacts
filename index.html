@@ -147,11 +147,8 @@
       <button class="contact-button" id="btn-hun">HUN IT</button>
     </div>
     <!-- Warning Box -->
-    <div class="warning-box">
+    <div class="warning-box" id="warning-box">
       This is a test warning
-    </div>
-    <div class="warning-box">
-      No seriously, we use this for warnings
     </div>
   </div>
 
@@ -367,6 +364,14 @@
     document.getElementById("btn-hun").addEventListener("click", function() {
       triggerCallForContact(extraContacts[2].id);
     });
+
+    /*****************************************
+     * Hide Warning Box if No Text is Present  *
+     *****************************************/
+    const warningBox = document.getElementById("warning-box");
+    if (warningBox.textContent.trim() === "") {
+      warningBox.style.display = "none";
+    }
   </script>
 </body>
 </html>
