@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Genesys Cloud - Prioritete Dialer</title>
+  <title>Prioritete Dialer</title>
   <style>
     /* Reset & Base Styles */
     * {
@@ -14,62 +14,59 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f4f7f9;
       color: #333;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
+      padding: 10px;
     }
     /* Container for the two sections */
     .sections-container {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 30px;
+      gap: 10px;
+      margin-bottom: 15px;
     }
     .prioritete-section {
       background: #fff;
-      padding: 15px;
-      border-radius: 8px;
+      padding: 10px;
+      border-radius: 6px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       flex: 1;
-      min-width: 300px;
+      min-width: 280px;
     }
     .prioritete-section h2 {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       color: #0073e6;
+      font-size: 16px;
     }
     /* Columns within each section */
     .columns {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
+      gap: 5px;
     }
     .column {
       background: #fafafa;
-      border-radius: 5px;
-      padding: 10px;
+      border-radius: 4px;
+      padding: 5px;
       flex: 1;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     .column h3 {
       text-align: center;
-      font-size: 16px;
-      margin-bottom: 8px;
+      font-size: 14px;
+      margin-bottom: 4px;
       color: #444;
     }
     .contact-button {
       display: block;
       width: 100%;
-      margin: 5px 0;
-      padding: 8px;
+      margin: 3px 0;
+      padding: 4px 6px;
       border: none;
-      border-radius: 5px;
+      border-radius: 4px;
       background: #0073e6;
       color: #fff;
-      font-size: 14px;
+      font-size: 12px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
@@ -79,13 +76,13 @@
     /* Test Button at the bottom */
     #test-button {
       display: block;
-      margin: 30px auto 0;
-      padding: 12px 24px;
-      font-size: 16px;
+      margin: 20px auto 0;
+      padding: 8px 16px;
+      font-size: 14px;
       background: #e67e22;
       color: #fff;
       border: none;
-      border-radius: 5px;
+      border-radius: 4px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
@@ -199,7 +196,6 @@
     /***********************************************
      * Create RSA Contact Arrays (Deep Copies)     *
      ***********************************************/
-    // Use JSON methods for a deep clone since our arrays contain only plain objects.
     const rsaLjubljanaContacts = JSON.parse(JSON.stringify(originalLjubljanaContacts));
     const rsaKoperContacts = JSON.parse(JSON.stringify(originalKoperContacts));
     const rsaMariborContacts = JSON.parse(JSON.stringify(originalMariborContacts));
@@ -329,7 +325,6 @@
     /*****************************************
      * Test Button (Vid Žvan) Handler        *
      *****************************************/
-    // Test button uses a specific external contact (Vid Žvan)
     const vidZvanContactId = "791a605b-7948-4e5a-94e6-5b670054a781";
     document.getElementById("test-button").addEventListener("click", function() {
       triggerCallForContact(vidZvanContactId);
