@@ -92,7 +92,7 @@
       flex: 1;
       max-width: 150px;
     }
-    /* Warning Box Styling */
+    /* Warning Box Styling (Bold, Big Letters, Uppercase) */
     .warning-box {
       background-color: #f8d7da;
       border: 1px solid #f5c6cb;
@@ -100,13 +100,15 @@
       padding: 8px 10px;
       border-radius: 4px;
       margin-top: 10px;
-      font-size: 14px;
+      font-size: 18px;        /* Larger font size */
       text-align: center;
+      font-weight: bold;      /* Bold text */
+      text-transform: uppercase; /* Uppercase letters */
     }
-    /* Notice Box Styling */
+    /* Notice Box Styling with Darker Edge */
     .notice-box {
       background-color: #fff3cd;
-      border: 1px solid #ffeeba;
+      border: 2px solid #d39e00;
       color: #856404;
       padding: 8px 10px;
       border-radius: 4px;
@@ -157,7 +159,7 @@
       <button class="contact-button" id="btn-sanja">Sanja Strovjanova</button>
       <button class="contact-button" id="btn-hun">HUN IT</button>
     </div>
-    <!-- Warning Box -->
+    <!-- Warning Box (always bold and big letters) -->
     <div class="warning-box" id="warning-box">
       This is a test warning
     </div>
@@ -165,7 +167,7 @@
   <!-- Notice Box -->
   <div class="notice-box" id="notice-box">
     <strong>SANTORINI ALERT:</strong><br>
-    <em>Prosimo, da ko beležite primere v Santoriniju, ki so povezani s potresi, zadeve ustrezno označite v SAX-u. <br>
+    <em>Prosimo, da ko beležite primere v Santoriniju, ki so povezani s potresi, zadeve ustrezno označite v SAX-u.<br>
 Pod "Case type:" izberite Santorini_Quakes_25</em>
   </div>
 
