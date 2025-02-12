@@ -16,7 +16,7 @@
       color: #333;
       padding: 10px;
     }
-    /* Container for the two sections */
+    /* Container for the two main sections */
     .sections-container {
       display: flex;
       flex-wrap: wrap;
@@ -73,21 +73,16 @@
     .contact-button:hover {
       background: #005bb5;
     }
-    /* Test Button at the bottom */
-    #test-button {
-      display: block;
-      margin: 20px auto 0;
-      padding: 8px 16px;
-      font-size: 14px;
-      background: #e67e22;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background 0.3s ease;
+    /* Extra Buttons container (replacing the Vid Žvan test button) */
+    .extra-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 15px;
     }
-    #test-button:hover {
-      background: #d35400;
+    .extra-buttons .contact-button {
+      flex: 1;
+      max-width: 150px;
     }
   </style>
 </head>
@@ -124,8 +119,12 @@
       </div>
     </div>
   </div>
-  <!-- Test Button (Vid Žvan) -->
-  <button id="test-button">Vid Žvan (Test)</button>
+  <!-- Extra Buttons (replacing Vid Žvan button) -->
+  <div class="extra-buttons">
+    <button class="contact-button" id="btn-jakob">Jakob Jarc Sojč</button>
+    <button class="contact-button" id="btn-sanja">Sanja Strovjanova</button>
+    <button class="contact-button" id="btn-hun">HUN IT</button>
+  </div>
 
   <script>
     /***********************
@@ -323,11 +322,23 @@
     }
 
     /*****************************************
-     * Test Button (Vid Žvan) Handler        *
+     * Extra Buttons Handlers (New Contacts) *
      *****************************************/
-    const vidZvanContactId = "791a605b-7948-4e5a-94e6-5b670054a781";
-    document.getElementById("test-button").addEventListener("click", function() {
-      triggerCallForContact(vidZvanContactId);
+    // Define the extra contacts for the three new buttons:
+    const extraContacts = [
+      { label: "Jakob Jarc Sojč", id: "4c6494e1-ec2e-4546-9d65-3f8a6ea74da5" },
+      { label: "Sanja Strovjanova", id: "1e9f1b03-d46c-40eb-9039-3410f9506c72" },
+      { label: "HUN IT", id: "4329683a-066a-45b9-9fef-a7099ef3e515" }
+    ];
+    // Attach event listeners to the extra buttons
+    document.getElementById("btn-jakob").addEventListener("click", function() {
+      triggerCallForContact(extraContacts[0].id);
+    });
+    document.getElementById("btn-sanja").addEventListener("click", function() {
+      triggerCallForContact(extraContacts[1].id);
+    });
+    document.getElementById("btn-hun").addEventListener("click", function() {
+      triggerCallForContact(extraContacts[2].id);
     });
   </script>
 </body>
