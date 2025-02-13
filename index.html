@@ -93,7 +93,7 @@
       flex: 1;
       max-width: 150px;
     }
-    /* Warning & Notice Boxes */
+    /* Warning Box Styling (Bold, Big Letters, Uppercase) */
     .warning-box {
       background-color: #f8d7da;
       border: 1px solid #f5c6cb;
@@ -106,6 +106,7 @@
       font-weight: bold;
       text-transform: uppercase;
     }
+    /* Notice Box Styling with Darker Edge */
     .notice-box {
       background-color: #fff3cd;
       border: 2px solid #d39e00;
@@ -127,8 +128,8 @@
       text-align: center;
     }
   </style>
-  <!-- Load the Genesys Cloud SDK from CDN -->
-  <script src="https://sdk-cdn.mypurecloud.com/javascript/genesys-cloud-client/latest/genesys-cloud-client.min.js"></script>
+  <!-- Load the Genesys Cloud SDK from CDN with defer -->
+  <script src="https://sdk-cdn.mypurecloud.com/javascript/genesys-cloud-client/latest/genesys-cloud-client.min.js" defer></script>
 </head>
 <body>
   <div class="sections-container">
@@ -198,10 +199,10 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
 
       const platformClient = window.platformClient;
       const apiClient = platformClient.ApiClient.instance;
-      // Set the environment to DE region (mypurecloud.de)
+      // Set the environment (for DE region, use "mypurecloud.de")
       apiClient.setEnvironment("mypurecloud.de");
 
-      // Replace with your actual client ID and redirect URI
+      // Replace these with your actual Genesys Cloud settings:
       const clientId = "c6dcc699-08b2-4484-a165-63dcf225e982";
       const redirectUri = "https://ishockie.github.io/PopularContacts/"; // e.g., "https://yourusername.github.io/yourrepo/"
 
@@ -236,7 +237,7 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
             { label: "HUDIN", id: "bd6e6ec7-54e6-407f-8993-43f0a80441d0" }
           ];
 
-          function renderContacts(prefix, ljContacts, koContacts, maContacts) {
+          function renderContactsForSection(prefix, ljContacts, koContacts, maContacts) {
             function createButton(contact) {
               const btn = document.createElement("button");
               btn.className = "contact-button";
@@ -247,7 +248,6 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
               });
               return btn;
             }
-            // Render columns
             const ljCol = document.getElementById(prefix + "ljubljana-column");
             ljContacts.forEach(contact => {
               ljCol.appendChild(createButton(contact));
@@ -261,9 +261,9 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
               maCol.appendChild(createButton(contact));
             });
           }
-          // Render RSA Prioritete section (using original arrays)
-          renderContacts("rsa-", originalLjubljanaContacts, originalKoperContacts, originalMariborContacts);
-          // Render RC Prioritete section (using new RC arrays)
+          // Render RSA and RC Prioritete sections
+          renderContactsForSection("rsa-", originalLjubljanaContacts, originalKoperContacts, originalMariborContacts);
+
           const rcLjubljanaContacts = [
             { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
             { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
@@ -293,13 +293,13 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
             { label: "ABMOBIL", id: "6734f0cb-a007-4da3-b121-1f8ba9bddb9d" },
             { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" }
           ];
-          // Optionally, perform a daily rotation on RC Ljubljana contacts (if desired)
+          // Optional daily rotation for RC Ljubljana contacts:
           const rcRotationOffset = Math.floor(Date.now() / 86400000) % 4;
           const rcFirstFour = rcLjubljanaContacts.slice(0, 4);
           const rcRotatedFirstFour = rcFirstFour.slice(rcRotationOffset).concat(rcFirstFour.slice(0, rcRotationOffset));
           rcLjubljanaContacts.splice(0, 4, ...rcRotatedFirstFour);
 
-          renderContacts("rc-", rcLjubljanaContacts, rcKoperContacts, rcMariborContacts);
+          renderContactsForSection("rc-", rcLjubljanaContacts, rcKoperContacts, rcMariborContacts);
 
           /******************************************************
            * Genesys Cloud API Calls Using the SDK
