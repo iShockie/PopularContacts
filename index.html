@@ -189,11 +189,11 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
 
   <script>
     window.onload = function() {
-      console.log("PopularContacts app using Genesys Cloud SDK is running.");
+      console.log("PopularContacts app using Genesys Cloud SDKK is running.");
 
       // Check if the Genesys Cloud SDK is loaded
       if (!window.platformClient) {
-        console.error("Genesys Cloud SDK not loaded!");
+        console.error("Genesys Cloud SDKK not loaded!");
         return;
       }
 
@@ -209,7 +209,7 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
       // Login using the SDK's implicit grant flow
       apiClient.loginImplicitGrantFlow(clientId, redirectUri)
         .then(() => {
-          console.log("Logged in successfully via Genesys Cloud SDK.");
+          console.log("Logged in successfully via Genesys Cloud SDKK.");
           console.log("Using token:", apiClient.authToken);
 
           /***********************************************
