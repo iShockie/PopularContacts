@@ -127,7 +127,7 @@
       text-align: center;
     }
   </style>
-  <!-- Load the Genesys Cloud SDK -->
+  <!-- Load the Genesys Cloud SDK from CDN -->
   <script src="https://sdk-cdn.mypurecloud.com/javascript/genesys-cloud-client/latest/genesys-cloud-client.min.js"></script>
 </head>
 <body>
@@ -173,7 +173,7 @@
     </div>
     <!-- Warning Box -->
     <div class="warning-box" id="warning-box">
-      <!-- Warning text can be inserted here -->
+      <!-- Insert Warning Text Here -->
     </div>
   </div>
   <!-- Notice Box -->
@@ -187,155 +187,197 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
   </div>
 
   <script>
-    console.log("PopularContacts app using Genesys Cloud SDK is running.");
+    window.onload = function() {
+      console.log("PopularContacts app using Genesys Cloud SDK is running.");
 
-    // Initialize the Genesys Cloud SDK
-    const platformClient = window.platformClient;
-    const apiClient = platformClient.ApiClient.instance;
-    // Set the environment (for DE region, use "mypurecloud.de")
-    apiClient.setEnvironment("mypurecloud.de");
+      // Check if the Genesys Cloud SDK is loaded
+      if (!window.platformClient) {
+        console.error("Genesys Cloud SDK not loaded!");
+        return;
+      }
 
-    // Replace with your actual client ID and redirect URI
-    const clientId = "c6dcc699-08b2-4484-a165-63dcf225e982";
-    const redirectUri = "https://ishockie.github.io/PopularContacts/"; // e.g., "https://yourusername.github.io/yourrepo/"
+      const platformClient = window.platformClient;
+      const apiClient = platformClient.ApiClient.instance;
+      // Set the environment to DE region (mypurecloud.de)
+      apiClient.setEnvironment("mypurecloud.de");
 
-    // Login using the implicit grant flow
-    apiClient.loginImplicitGrantFlow(clientId, redirectUri)
-      .then(() => {
-        console.log("Logged in successfully via Genesys Cloud SDK.");
-        // Log the token for debugging purposes
-        console.log("Using token:", apiClient.authToken);
+      // Replace with your actual client ID and redirect URI
+      const clientId = "c6dcc699-08b2-4484-a165-63dcf225e982";
+      const redirectUri = "https://ishockie.github.io/PopularContacts/"; // e.g., "https://yourusername.github.io/yourrepo/"
 
-        // Now you can initialize your UI rendering and event handlers
+      // Login using the SDK's implicit grant flow
+      apiClient.loginImplicitGrantFlow(clientId, redirectUri)
+        .then(() => {
+          console.log("Logged in successfully via Genesys Cloud SDK.");
+          console.log("Using token:", apiClient.authToken);
 
-        /***********************************************
-         * Contact Arrays & Rendering Functions
-         ***********************************************/
-        const originalLjubljanaContacts = [
-          { label: "KOPITAR", id: "6f4a014e-f682-476a-9918-dc38a0f8cc7d" },
-          { label: "PRIMOŽIČ", id: "338778a9-4b68-4cd0-ad40-89e92d51afca" },
-          { label: "OPA", id: "e77faf7c-3b32-4715-af27-1d08cce00b64" },
-          { label: "SOS", id: "6063dd44-ca3c-41f1-8348-02dde9aea7fa" },
-          { label: "ŠUČUR", id: "2e8dac1e-d11b-4dcb-b9cf-d675b4a0e9b8" },
-          { label: "WRC", id: "71175553-2f32-4f79-8e74-0eafed8582b6" },
-          { label: "PAVČNIK", id: "d008e1b7-d0d8-4bbd-b389-7dd963ed10c0" },
-          { label: "POTOČNIK", id: "b228cfaf-feaf-4062-915a-893cb4f91ff2" }
-        ];
-        const originalKoperContacts = [
-          { label: "PAJR", id: "2cb9ed91-ab14-4b67-8488-eda9c39d1532" },
-          { label: "GREGORIČ", id: "5a772fb1-4e0d-4e85-81d2-02312af64f78" },
-          { label: "MARTINČIČ", id: "d03bf6df-26f0-40ae-a2b8-ec28e5dafc9c" },
-          { label: "RUSTJA", id: "0267e76c-2899-4c76-843c-150b3b8f21a6" }
-        ];
-        const originalMariborContacts = [
-          { label: "TOPTIM", id: "37f3bc90-70a4-47c8-8c46-88dccd00b134" },
-          { label: "KETIŠ", id: "a3f32ab5-d68d-4a1d-b9e3-858d42cb56d8" },
-          { label: "HUDIN", id: "bd6e6ec7-54e6-407f-8993-43f0a80441d0" }
-        ];
+          /***********************************************
+           * Contact Arrays & Rendering Functions
+           ***********************************************/
+          const originalLjubljanaContacts = [
+            { label: "KOPITAR", id: "6f4a014e-f682-476a-9918-dc38a0f8cc7d" },
+            { label: "PRIMOŽIČ", id: "338778a9-4b68-4cd0-ad40-89e92d51afca" },
+            { label: "OPA", id: "e77faf7c-3b32-4715-af27-1d08cce00b64" },
+            { label: "SOS", id: "6063dd44-ca3c-41f1-8348-02dde9aea7fa" },
+            { label: "ŠUČUR", id: "2e8dac1e-d11b-4dcb-b9cf-d675b4a0e9b8" },
+            { label: "WRC", id: "71175553-2f32-4f79-8e74-0eafed8582b6" },
+            { label: "PAVČNIK", id: "d008e1b7-d0d8-4bbd-b389-7dd963ed10c0" },
+            { label: "POTOČNIK", id: "b228cfaf-feaf-4062-915a-893cb4f91ff2" }
+          ];
+          const originalKoperContacts = [
+            { label: "PAJR", id: "2cb9ed91-ab14-4b67-8488-eda9c39d1532" },
+            { label: "GREGORIČ", id: "5a772fb1-4e0d-4e85-81d2-02312af64f78" },
+            { label: "MARTINČIČ", id: "d03bf6df-26f0-40ae-a2b8-ec28e5dafc9c" },
+            { label: "RUSTJA", id: "0267e76c-2899-4c76-843c-150b3b8f21a6" }
+          ];
+          const originalMariborContacts = [
+            { label: "TOPTIM", id: "37f3bc90-70a4-47c8-8c46-88dccd00b134" },
+            { label: "KETIŠ", id: "a3f32ab5-d68d-4a1d-b9e3-858d42cb56d8" },
+            { label: "HUDIN", id: "bd6e6ec7-54e6-407f-8993-43f0a80441d0" }
+          ];
 
-        function renderContactsForSection(prefix, ljContacts, koContacts, maContacts) {
-          function createButton(contact) {
-            const btn = document.createElement("button");
-            btn.className = "contact-button";
-            btn.textContent = contact.label;
-            btn.dataset.contactId = contact.id;
-            btn.addEventListener("click", function() {
-              triggerCallForContact(contact.id);
+          function renderContacts(prefix, ljContacts, koContacts, maContacts) {
+            function createButton(contact) {
+              const btn = document.createElement("button");
+              btn.className = "contact-button";
+              btn.textContent = contact.label;
+              btn.dataset.contactId = contact.id;
+              btn.addEventListener("click", function() {
+                triggerCallForContact(contact.id);
+              });
+              return btn;
+            }
+            // Render columns
+            const ljCol = document.getElementById(prefix + "ljubljana-column");
+            ljContacts.forEach(contact => {
+              ljCol.appendChild(createButton(contact));
             });
-            return btn;
+            const koCol = document.getElementById(prefix + "koper-column");
+            koContacts.forEach(contact => {
+              koCol.appendChild(createButton(contact));
+            });
+            const maCol = document.getElementById(prefix + "maribor-column");
+            maContacts.forEach(contact => {
+              maCol.appendChild(createButton(contact));
+            });
           }
-          const ljCol = document.getElementById(prefix + "ljubljana-column");
-          ljContacts.forEach(contact => {
-            ljCol.appendChild(createButton(contact));
+          // Render RSA Prioritete section (using original arrays)
+          renderContacts("rsa-", originalLjubljanaContacts, originalKoperContacts, originalMariborContacts);
+          // Render RC Prioritete section (using new RC arrays)
+          const rcLjubljanaContacts = [
+            { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
+            { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
+            { label: "NAVIS", id: "78aa1907-7d65-4850-b6d9-d32591398ff7" },
+            { label: "DIVO", id: "45352a79-2c03-40c8-bd49-17c85fb5eb97" },
+            { label: "AVTOTEHNA VIS", id: "38190b70-3ace-4e4d-b93a-0b008e09f9e7" },
+            { label: "FRIRENT", id: "23865f30-ca7c-450d-a24f-b86b6f970310" },
+            { label: "AB MOBIL", id: "99740188-5c62-4ecd-bcbd-f2846e943e2c" },
+            { label: "BUDGET RENTACAR", id: "22605b68-ac69-4413-9cbf-40429fc0d9f1" },
+            { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" },
+            { label: "AVTO TROBEC", id: "67d843df-2668-4771-a7da-9210b77fab24" },
+            { label: "BIRO PECELI", id: "f2f01262-28fe-4624-bf0d-7f93edc90fd6" },
+            { label: "ŠPAN", id: "c90d5f6a-e7ef-480a-b105-d0f38f47ef63" },
+            { label: "BORGER GREMO", id: "911898ce-c5b9-45b7-a0e2-a86e165cb151" }
+          ];
+          const rcKoperContacts = [
+            { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
+            { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
+            { label: "ABMOBIL", id: "da4197e6-e5f8-4f7c-8036-3b985415dd8d" },
+            { label: "FRIRENT", id: "2cf3a264-f8fb-4be5-9c5e-2623b6eb1b8a" },
+            { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" }
+          ];
+          const rcMariborContacts = [
+            { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
+            { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
+            { label: "DIVO", id: "45352a79-2c03-40c8-bd49-17c85fb5eb97" },
+            { label: "ABMOBIL", id: "6734f0cb-a007-4da3-b121-1f8ba9bddb9d" },
+            { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" }
+          ];
+          // Optionally, perform a daily rotation on RC Ljubljana contacts (if desired)
+          const rcRotationOffset = Math.floor(Date.now() / 86400000) % 4;
+          const rcFirstFour = rcLjubljanaContacts.slice(0, 4);
+          const rcRotatedFirstFour = rcFirstFour.slice(rcRotationOffset).concat(rcFirstFour.slice(0, rcRotationOffset));
+          rcLjubljanaContacts.splice(0, 4, ...rcRotatedFirstFour);
+
+          renderContacts("rc-", rcLjubljanaContacts, rcKoperContacts, rcMariborContacts);
+
+          /******************************************************
+           * Genesys Cloud API Calls Using the SDK
+           ******************************************************/
+          function fetchExternalContact(contactId) {
+            const externalContactsApi = new platformClient.ExternalContactsApi();
+            console.log("Fetching external contact for ID:", contactId);
+            return externalContactsApi.getExternalcontactsContact(contactId)
+              .then(contactData => {
+                console.log("External contact data:", contactData);
+                return contactData;
+              });
+          }
+
+          function triggerCallWithPhone(phoneNumber, contactId) {
+            const conversationsApi = new platformClient.ConversationsApi();
+            const payload = {
+              callFromQueueId: "477cbe0e-1865-4b06-933b-e81961c3c827",
+              phoneNumber: phoneNumber,
+              callerId: "+38628216565",
+              externalContactId: contactId,
+              destinations: [{
+                address: phoneNumber,
+                addressType: "phone"
+              }]
+            };
+            console.log("Triggering call with payload:", payload);
+            return conversationsApi.createCallConversation(payload)
+              .then(data => {
+                console.log("Call triggered successfully:", data);
+                return data;
+              });
+          }
+
+          function triggerCallForContact(contactId) {
+            console.log("Triggering call for contact:", contactId);
+            fetchExternalContact(contactId)
+              .then(contactData => {
+                const phoneNumber = (contactData.workPhone && contactData.workPhone.e164) || null;
+                if (!phoneNumber) {
+                  throw new Error("No work phone number found for external contact " + contactId);
+                }
+                console.log("Using work phone number:", phoneNumber);
+                return triggerCallWithPhone(phoneNumber, contactId);
+              })
+              .catch(err => {
+                console.error("Error triggering call for contact", contactId, ":", err);
+              });
+          }
+
+          /*****************************************
+           * Extra Buttons Handlers (New Contacts) *
+           *****************************************/
+          const extraContacts = [
+            { label: "Jakob Jarc Sojč", id: "4c6494e1-ec2e-4546-9d65-3f8a6ea74da5" },
+            { label: "Sanja Strovjanova", id: "1e9f1b03-d46c-40eb-9039-3410f9506c72" },
+            { label: "HUN IT", id: "4329683a-066a-45b9-9fef-a7099ef3e515" }
+          ];
+          document.getElementById("btn-jakob").addEventListener("click", function() {
+            triggerCallForContact(extraContacts[0].id);
           });
-          const koCol = document.getElementById(prefix + "koper-column");
-          koContacts.forEach(contact => {
-            koCol.appendChild(createButton(contact));
+          document.getElementById("btn-sanja").addEventListener("click", function() {
+            triggerCallForContact(extraContacts[1].id);
           });
-          const maCol = document.getElementById(prefix + "maribor-column");
-          maContacts.forEach(contact => {
-            maCol.appendChild(createButton(contact));
+          document.getElementById("btn-hun").addEventListener("click", function() {
+            triggerCallForContact(extraContacts[2].id);
           });
-        }
-        // For RSA, we use the original arrays (or perform swaps as needed)
-        renderContactsForSection("rsa-", originalLjubljanaContacts, originalKoperContacts, originalMariborContacts);
-        // For RC, we use the same arrays for simplicity in this example
-        renderContactsForSection("rc-", originalLjubljanaContacts, originalKoperContacts, originalMariborContacts);
 
-        /**********************************************
-         * Genesys Cloud API Calls Using the SDK
-         **********************************************/
-        function fetchExternalContact(contactId) {
-          const externalContactsApi = new platformClient.ExternalContactsApi();
-          console.log("Fetching external contact for ID:", contactId);
-          return externalContactsApi.getExternalcontactsContact(contactId)
-            .then(contactData => {
-              console.log("External contact data:", contactData);
-              return contactData;
-            });
-        }
-
-        function triggerCallWithPhone(phoneNumber, contactId) {
-          const conversationsApi = new platformClient.ConversationsApi();
-          const payload = {
-            callFromQueueId: "477cbe0e-1865-4b06-933b-e81961c3c827",
-            phoneNumber: phoneNumber,
-            callerId: "+38628216565",
-            externalContactId: contactId,
-            destinations: [{
-              address: phoneNumber,
-              addressType: "phone"
-            }]
-          };
-          console.log("Triggering call with payload:", payload);
-          return conversationsApi.createCallConversation(payload)
-            .then(data => {
-              console.log("Call triggered successfully:", data);
-              return data;
-            });
-        }
-
-        function triggerCallForContact(contactId) {
-          console.log("Triggering call for contact:", contactId);
-          fetchExternalContact(contactId)
-            .then(contactData => {
-              const phoneNumber = (contactData.workPhone && contactData.workPhone.e164) || null;
-              if (!phoneNumber) {
-                throw new Error("No work phone number found for external contact " + contactId);
-              }
-              console.log("Using work phone number:", phoneNumber);
-              return triggerCallWithPhone(phoneNumber, contactId);
-            })
-            .catch(err => {
-              console.error("Error triggering call for contact", contactId, ":", err);
-            });
-        }
-
-        // Extra buttons for Interni kontakti
-        const extraContacts = [
-          { label: "Jakob Jarc Sojč", id: "4c6494e1-ec2e-4546-9d65-3f8a6ea74da5" },
-          { label: "Sanja Strovjanova", id: "1e9f1b03-d46c-40eb-9039-3410f9506c72" },
-          { label: "HUN IT", id: "4329683a-066a-45b9-9fef-a7099ef3e515" }
-        ];
-        document.getElementById("btn-jakob").addEventListener("click", function() {
-          triggerCallForContact(extraContacts[0].id);
+          // Optionally, hide the warning box if no text is present
+          const warningBox = document.getElementById("warning-box");
+          if (warningBox.textContent.trim() === "") {
+            warningBox.style.display = "none";
+          }
+        })
+        .catch(err => {
+          console.error("Error during Genesys Cloud SDK login:", err);
         });
-        document.getElementById("btn-sanja").addEventListener("click", function() {
-          triggerCallForContact(extraContacts[1].id);
-        });
-        document.getElementById("btn-hun").addEventListener("click", function() {
-          triggerCallForContact(extraContacts[2].id);
-        });
-
-        // Optionally, hide the warning box if no text is present
-        const warningBox = document.getElementById("warning-box");
-        if (warningBox.textContent.trim() === "") {
-          warningBox.style.display = "none";
-        }
-      })
-      .catch(err => {
-        console.error("Error during Genesys Cloud SDK login:", err);
-      });
+    };
   </script>
 </body>
 </html>
