@@ -67,7 +67,7 @@
       background: #0073e6;
       color: #fff;
       font-size: 12px;
-      font-weight: bold;      /* Bold text */
+      font-weight: bold; /* Bold text */
       cursor: pointer;
       transition: background 0.3s ease;
     }
@@ -118,14 +118,14 @@
       text-align: center;
     }
     .motd-box {
-  background-color: #d4edda; /* Light green background */
-  border: 2px solid #28a745; /* Green border */
-  color: #155724;          /* Dark green text */
-  padding: 8px 10px;
-  border-radius: 4px;
-  margin-top: 10px;
-  font-size: 14px;
-  text-align: center;
+      background-color: #d4edda; /* Light green background */
+      border: 2px solid #28a745; /* Green border */
+      color: #155724;           /* Dark green text */
+      padding: 8px 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-size: 14px;
+      text-align: center;
     }
   </style>
 </head>
@@ -172,7 +172,7 @@
     </div>
     <!-- Warning Box (always bold and big letters) -->
     <div class="warning-box" id="warning-box">
-<!-- PUT WARNING TEXT HERE -->
+      <!-- PUT WARNING TEXT HERE -->
     </div>
   </div>
   <!-- Notice Box -->
@@ -181,274 +181,278 @@
     <em>Prosimo, da ko beležite primere v Santoriniju, ki so povezani s potresi, zadeve ustrezno označite v SAX-u.<br>
 Pod "Case type:" izberite Santorini_Quakes_25</em>
   </div>
-<div class="motd-box" id="motd-box">
-  <em><strong>Chuck Norris might be legendary, but our call center answers faster than Chuck does push ups.</strong><br></em>
-</div>
+  <div class="motd-box" id="motd-box">
+    <em><strong>Chuck Norris might be legendary, but our call center answers faster than Chuck does push ups.</strong><br></em>
+  </div>
   <script>
-  /***********************
-   * OAuth Configuration *
-   ***********************/
-  const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';
-  const redirectUriValue = "https://ishockie.github.io/PopularContacts/";
-  const redirectUri = encodeURIComponent(redirectUriValue);
-  const state = "abc123";
-  const oauthEndpoint = "https://login.mypurecloud.de/oauth/authorize";
-  const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+    console.log("Prioritete Dialer script is running.");
 
-  function getParamsFromHash() {
-    const hash = window.location.hash.substring(1);
-    return new URLSearchParams(hash);
-  }
-  function handleOAuthRedirect() {
-    const params = getParamsFromHash();
-    if (params.has('error')) {
-      console.error("OAuth Error:", params.get("error"), params.get("error_description"));
-      return null;
+    /***********************
+     * OAuth Configuration *
+     ***********************/
+    const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';
+    const redirectUriValue = "https://ishockie.github.io/PopularContacts/";
+    const redirectUri = encodeURIComponent(redirectUriValue);
+    const state = "abc123";
+    const oauthEndpoint = "https://login.mypurecloud.de/oauth/authorize";
+    const authUrl = `${oauthEndpoint}?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
+
+    function getParamsFromHash() {
+      const hash = window.location.hash.substring(1);
+      return new URLSearchParams(hash);
     }
-    return params.get('access_token');
-  }
-  let accessToken = handleOAuthRedirect();
-  if (accessToken) {
-    localStorage.setItem("genesys_access_token", accessToken);
-    window.location.hash = "";
-  } else {
-    accessToken = localStorage.getItem("genesys_access_token");
-  }
-  if (!accessToken) {
-    console.error("No access token available. Redirecting to OAuth URL:", authUrl);
-    window.location.href = authUrl;
-  }
 
-  /**************************************
-   * Global Outbound Call Configuration *
-   **************************************/
-  const callFromQueueId = "477cbe0e-1865-4b06-933b-e81961c3c827";
-  const callerId = "+38628216565";
+    function handleOAuthRedirect() {
+      const params = getParamsFromHash();
+      if (params.has('error')) {
+        console.error("OAuth Error:", params.get("error"), params.get("error_description"));
+        return null;
+      }
+      return params.get('access_token');
+    }
 
-  /***********************************************
-   * RSA Prioritete Contacts (Unchanged)         *
-   ***********************************************/
-  const originalLjubljanaContacts = [
-    { label: "KOPITAR", id: "6f4a014e-f682-476a-9918-dc38a0f8cc7d" },
-    { label: "PRIMOŽIČ", id: "338778a9-4b68-4cd0-ad40-89e92d51afca" },
-    { label: "OPA", id: "e77faf7c-3b32-4715-af27-1d08cce00b64" },
-    { label: "SOS", id: "6063dd44-ca3c-41f1-8348-02dde9aea7fa" },
-    { label: "ŠUČUR", id: "2e8dac1e-d11b-4dcb-b9cf-d675b4a0e9b8" },
-    { label: "WRC", id: "71175553-2f32-4f79-8e74-0eafed8582b6" },
-    { label: "PAVČNIK", id: "d008e1b7-d0d8-4bbd-b389-7dd963ed10c0" },
-    { label: "POTOČNIK", id: "b228cfaf-feaf-4062-915a-893cb4f91ff2" }
-  ];
-  const originalKoperContacts = [
-    { label: "PAJR", id: "2cb9ed91-ab14-4b67-8488-eda9c39d1532" },
-    { label: "GREGORIČ", id: "5a772fb1-4e0d-4e85-81d2-02312af64f78" },
-    { label: "MARTINČIČ", id: "d03bf6df-26f0-40ae-a2b8-ec28e5dafc9c" },
-    { label: "RUSTJA", id: "0267e76c-2899-4c76-843c-150b3b8f21a6" }
-  ];
-  const originalMariborContacts = [
-    { label: "TOPTIM", id: "37f3bc90-70a4-47c8-8c46-88dccd00b134" },
-    { label: "KETIŠ", id: "a3f32ab5-d68d-4a1d-b9e3-858d42cb56d8" },
-    { label: "HUDIN", id: "bd6e6ec7-54e6-407f-8993-43f0a80441d0" }
-  ];
+    let accessToken = handleOAuthRedirect();
+    if (accessToken) {
+      console.log("Access token obtained from URL hash.");
+      localStorage.setItem("genesys_access_token", accessToken);
+      window.location.hash = "";
+    } else {
+      accessToken = localStorage.getItem("genesys_access_token");
+      if (accessToken) {
+        console.log("Access token loaded from localStorage.");
+      }
+    }
 
-  /***********************************************
-   * Create RSA Contact Arrays (Deep Copies)     *
-   ***********************************************/
-  const rsaLjubljanaContacts = JSON.parse(JSON.stringify(originalLjubljanaContacts));
-  const rsaKoperContacts = JSON.parse(JSON.stringify(originalKoperContacts));
-  const rsaMariborContacts = JSON.parse(JSON.stringify(originalMariborContacts));
+    if (!accessToken) {
+      console.error("No access token available. Redirecting to OAuth URL:", authUrl);
+      window.location.href = authUrl;
+    } else {
+      // Log the token for debugging
+      console.log("Using token:", accessToken);
+    }
 
-  /*****************************************
-   * Daily Swap Logic for RSA Section Only *
-   *****************************************/
-  const dayToggle = Math.floor(Date.now() / 86400000) % 2; // 0 or 1
-  if(dayToggle === 0) {
-    // For Ljubljana (RSA), swap contacts 2 & 3 (indexes 1 and 2)
-    [rsaLjubljanaContacts[1], rsaLjubljanaContacts[2]] = [rsaLjubljanaContacts[2], rsaLjubljanaContacts[1]];
-    // For Koper (RSA), swap contacts 2 & 3 (indexes 1 and 2)
-    [rsaKoperContacts[1], rsaKoperContacts[2]] = [rsaKoperContacts[2], rsaKoperContacts[1]];
-    // For Maribor (RSA), swap contacts 1 & 2 (indexes 0 and 1)
-    [rsaMariborContacts[0], rsaMariborContacts[1]] = [rsaMariborContacts[1], rsaMariborContacts[0]];
-  }
+    /**************************************
+     * Global Outbound Call Configuration *
+     **************************************/
+    const callFromQueueId = "477cbe0e-1865-4b06-933b-e81961c3c827";
+    const callerId = "+38628216565";
 
-  /***********************************************
-   * RC Prioritete New Contacts (Replace Old RC) *
-   ***********************************************/
-  // Note: These arrays replace the previous RC (original*) arrays.
-  const rcLjubljanaContacts = [
-    { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
-    { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
-    { label: "NAVIS", id: "78aa1907-7d65-4850-b6d9-d32591398ff7" },
-    { label: "DIVO", id: "45352a79-2c03-40c8-bd49-17c85fb5eb97" },
-    { label: "AVTOTEHNA VIS", id: "38190b70-3ace-4e4d-b93a-0b008e09f9e7" },
-    { label: "FRIRENT", id: "23865f30-ca7c-450d-a24f-b86b6f970310" },
-    { label: "AB MOBIL", id: "99740188-5c62-4ecd-bcbd-f2846e943e2c" },
-    { label: "BUDGET RENTACAR", id: "22605b68-ac69-4413-9cbf-40429fc0d9f1" },
-    { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" },
-    { label: "AVTO TROBEC", id: "67d843df-2668-4771-a7da-9210b77fab24" },
-    { label: "BIRO PECELI", id: "f2f01262-28fe-4624-bf0d-7f93edc90fd6" },
-    { label: "ŠPAN", id: "c90d5f6a-e7ef-480a-b105-d0f38f47ef63" },
-    { label: "BORGER GREMO", id: "911898ce-c5b9-45b7-a0e2-a86e165cb151" }
-  ];
+    /***********************************************
+     * RSA Prioritete Contacts (Unchanged)         *
+     ***********************************************/
+    const originalLjubljanaContacts = [
+      { label: "KOPITAR", id: "6f4a014e-f682-476a-9918-dc38a0f8cc7d" },
+      { label: "PRIMOŽIČ", id: "338778a9-4b68-4cd0-ad40-89e92d51afca" },
+      { label: "OPA", id: "e77faf7c-3b32-4715-af27-1d08cce00b64" },
+      { label: "SOS", id: "6063dd44-ca3c-41f1-8348-02dde9aea7fa" },
+      { label: "ŠUČUR", id: "2e8dac1e-d11b-4dcb-b9cf-d675b4a0e9b8" },
+      { label: "WRC", id: "71175553-2f32-4f79-8e74-0eafed8582b6" },
+      { label: "PAVČNIK", id: "d008e1b7-d0d8-4bbd-b389-7dd963ed10c0" },
+      { label: "POTOČNIK", id: "b228cfaf-feaf-4062-915a-893cb4f91ff2" }
+    ];
+    const originalKoperContacts = [
+      { label: "PAJR", id: "2cb9ed91-ab14-4b67-8488-eda9c39d1532" },
+      { label: "GREGORIČ", id: "5a772fb1-4e0d-4e85-81d2-02312af64f78" },
+      { label: "MARTINČIČ", id: "d03bf6df-26f0-40ae-a2b8-ec28e5dafc9c" },
+      { label: "RUSTJA", id: "0267e76c-2899-4c76-843c-150b3b8f21a6" }
+    ];
+    const originalMariborContacts = [
+      { label: "TOPTIM", id: "37f3bc90-70a4-47c8-8c46-88dccd00b134" },
+      { label: "KETIŠ", id: "a3f32ab5-d68d-4a1d-b9e3-858d42cb56d8" },
+      { label: "HUDIN", id: "bd6e6ec7-54e6-407f-8993-43f0a80441d0" }
+    ];
 
-  const rcKoperContacts = [
-    { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
-    { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
-    { label: "ABMOBIL", id: "da4197e6-e5f8-4f7c-8036-3b985415dd8d" },
-    { label: "FRIRENT", id: "2cf3a264-f8fb-4be5-9c5e-2623b6eb1b8a" },
-    { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" }
-  ];
+    /***********************************************
+     * Create RSA Contact Arrays (Deep Copies)     *
+     ***********************************************/
+    const rsaLjubljanaContacts = JSON.parse(JSON.stringify(originalLjubljanaContacts));
+    const rsaKoperContacts = JSON.parse(JSON.stringify(originalKoperContacts));
+    const rsaMariborContacts = JSON.parse(JSON.stringify(originalMariborContacts));
 
-  const rcMariborContacts = [
-    { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
-    { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
-    { label: "DIVO", id: "45352a79-2c03-40c8-bd49-17c85fb5eb97" },
-    { label: "ABMOBIL", id: "6734f0cb-a007-4da3-b121-1f8ba9bddb9d" },
-    { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" }
-  ];
+    /*****************************************
+     * Daily Swap Logic for RSA Section Only *
+     *****************************************/
+    const dayToggle = Math.floor(Date.now() / 86400000) % 2; // 0 or 1
+    if(dayToggle === 0) {
+      // For Ljubljana (RSA), swap contacts 2 & 3 (indexes 1 and 2)
+      [rsaLjubljanaContacts[1], rsaLjubljanaContacts[2]] = [rsaLjubljanaContacts[2], rsaLjubljanaContacts[1]];
+      // For Koper (RSA), swap contacts 2 & 3 (indexes 1 and 2)
+      [rsaKoperContacts[1], rsaKoperContacts[2]] = [rsaKoperContacts[2], rsaKoperContacts[1]];
+      // For Maribor (RSA), swap contacts 1 & 2 (indexes 0 and 1)
+      [rsaMariborContacts[0], rsaMariborContacts[1]] = [rsaMariborContacts[1], rsaMariborContacts[0]];
+    }
 
-  // Apply daily rotation to the first 4 contacts in the RC Ljubljana column.
-  // This rotates the positions by one spot each day.
-  const rcRotationOffset = Math.floor(Date.now() / 86400000) % 4;
-  const rcFirstFour = rcLjubljanaContacts.slice(0, 4);
-  const rcRotatedFirstFour = rcFirstFour.slice(rcRotationOffset)
-                               .concat(rcFirstFour.slice(0, rcRotationOffset));
-  rcLjubljanaContacts.splice(0, 4, ...rcRotatedFirstFour);
+    /***********************************************
+     * RC Prioritete New Contacts (Replace Old RC) *
+     ***********************************************/
+    const rcLjubljanaContacts = [
+      { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
+      { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
+      { label: "NAVIS", id: "78aa1907-7d65-4850-b6d9-d32591398ff7" },
+      { label: "DIVO", id: "45352a79-2c03-40c8-bd49-17c85fb5eb97" },
+      { label: "AVTOTEHNA VIS", id: "38190b70-3ace-4e4d-b93a-0b008e09f9e7" },
+      { label: "FRIRENT", id: "23865f30-ca7c-450d-a24f-b86b6f970310" },
+      { label: "AB MOBIL", id: "99740188-5c62-4ecd-bcbd-f2846e943e2c" },
+      { label: "BUDGET RENTACAR", id: "22605b68-ac69-4413-9cbf-40429fc0d9f1" },
+      { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" },
+      { label: "AVTO TROBEC", id: "67d843df-2668-4771-a7da-9210b77fab24" },
+      { label: "BIRO PECELI", id: "f2f01262-28fe-4624-bf0d-7f93edc90fd6" },
+      { label: "ŠPAN", id: "c90d5f6a-e7ef-480a-b105-d0f38f47ef63" },
+      { label: "BORGER GREMO", id: "911898ce-c5b9-45b7-a0e2-a86e165cb151" }
+    ];
+    const rcKoperContacts = [
+      { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
+      { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
+      { label: "ABMOBIL", id: "da4197e6-e5f8-4f7c-8036-3b985415dd8d" },
+      { label: "FRIRENT", id: "2cf3a264-f8fb-4be5-9c5e-2623b6eb1b8a" },
+      { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" }
+    ];
+    const rcMariborContacts = [
+      { label: "ATET", id: "5801dec8-39b5-4e05-91d7-ee3672a1b567" },
+      { label: "EUROPCAR", id: "d91130d4-b776-4fb8-a4c2-edfc597c6378" },
+      { label: "DIVO", id: "45352a79-2c03-40c8-bd49-17c85fb5eb97" },
+      { label: "ABMOBIL", id: "6734f0cb-a007-4da3-b121-1f8ba9bddb9d" },
+      { label: "AVANT", id: "6bbf0060-557e-418f-bdd6-32187edbffcc" }
+    ];
+    // Apply daily rotation to the first 4 contacts in the RC Ljubljana column.
+    const rcRotationOffset = Math.floor(Date.now() / 86400000) % 4;
+    const rcFirstFour = rcLjubljanaContacts.slice(0, 4);
+    const rcRotatedFirstFour = rcFirstFour.slice(rcRotationOffset).concat(rcFirstFour.slice(0, rcRotationOffset));
+    rcLjubljanaContacts.splice(0, 4, ...rcRotatedFirstFour);
 
-  /******************************************************
-   * Render Contact Buttons for a Section               *
-   * The function takes a prefix to target the correct   *
-   * container IDs (e.g., "rsa-" or "rc-") and arrays for   *
-   * Ljubljana, Koper, and Maribor contacts.               *
-   ******************************************************/
-  function renderContacts(prefix, ljContacts, koContacts, maContacts) {
-    function createButton(contact) {
-      const btn = document.createElement("button");
-      btn.className = "contact-button";
-      btn.textContent = contact.label;
-      btn.dataset.contactId = contact.id;
-      btn.addEventListener("click", function() {
-        triggerCallForContact(contact.id);
+    /******************************************************
+     * Render Contact Buttons for a Section               *
+     ******************************************************/
+    function renderContacts(prefix, ljContacts, koContacts, maContacts) {
+      function createButton(contact) {
+        const btn = document.createElement("button");
+        btn.className = "contact-button";
+        btn.textContent = contact.label;
+        btn.dataset.contactId = contact.id;
+        btn.addEventListener("click", function() {
+          triggerCallForContact(contact.id);
+        });
+        return btn;
+      }
+      // Ljubljana
+      const ljCol = document.getElementById(prefix + "ljubljana-column");
+      ljContacts.forEach(contact => {
+        ljCol.appendChild(createButton(contact));
       });
-      return btn;
+      // Koper
+      const koCol = document.getElementById(prefix + "koper-column");
+      koContacts.forEach(contact => {
+        koCol.appendChild(createButton(contact));
+      });
+      // Maribor
+      const maCol = document.getElementById(prefix + "maribor-column");
+      maContacts.forEach(contact => {
+        maCol.appendChild(createButton(contact));
+      });
     }
-    // Render Ljubljana column
-    const ljCol = document.getElementById(prefix + "ljubljana-column");
-    ljContacts.forEach(contact => {
-      ljCol.appendChild(createButton(contact));
-    });
-    // Render Koper column
-    const koCol = document.getElementById(prefix + "koper-column");
-    koContacts.forEach(contact => {
-      koCol.appendChild(createButton(contact));
-    });
-    // Render Maribor column
-    const maCol = document.getElementById(prefix + "maribor-column");
-    maContacts.forEach(contact => {
-      maCol.appendChild(createButton(contact));
-    });
-  }
 
-  // Render RSA Prioritete section using swapped arrays (unchanged)
-  renderContacts("rsa-", rsaLjubljanaContacts, rsaKoperContacts, rsaMariborContacts);
-  
-  // Render RC Prioritete section using the new RC arrays
-  renderContacts("rc-", rcLjubljanaContacts, rcKoperContacts, rcMariborContacts);
+    // Render RSA Prioritete
+    renderContacts("rsa-", rsaLjubljanaContacts, rsaKoperContacts, rsaMariborContacts);
+    // Render RC Prioritete
+    renderContacts("rc-", rcLjubljanaContacts, rcKoperContacts, rcMariborContacts);
 
-  /******************************************************
-   * Genesys Cloud API Calls & Contact Outbound Functions *
-   ******************************************************/
-  function fetchExternalContact(contactId) {
-    const url = `https://api.mypurecloud.de/api/v2/externalcontacts/contacts/${contactId}`;
-    console.log("Fetching external contact from:", url);
-    return fetch(url, {
-      method: "GET",
-      headers: {
-        "Authorization": "Bearer " + accessToken,
-        "Content-Type": "application/json"
-      }
-    })
-    .then(response => {
-      if (!response.ok) {
-        return response.text().then(text => { throw new Error(text); });
-      }
-      return response.json();
-    });
-  }
-  function triggerCallWithPhone(phoneNumber, contactId) {
-    const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
-    const payload = {
-      callFromQueueId: callFromQueueId,
-      phoneNumber: phoneNumber,
-      callerId: callerId,
-      externalContactId: contactId,
-      destinations: [
-        {
-          address: phoneNumber,
-          addressType: "phone"
+    /******************************************************
+     * Genesys Cloud API Calls & Contact Outbound Functions
+     ******************************************************/
+    function fetchExternalContact(contactId) {
+      const url = `https://api.mypurecloud.de/api/v2/externalcontacts/contacts/${contactId}`;
+      console.log("Fetching external contact from:", url);
+      return fetch(url, {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + accessToken,
+          "Content-Type": "application/json"
         }
-      ]
-    };
-    console.log("Making outbound call API request with payload:", payload);
-    return fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer " + accessToken,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(response => {
-      console.log("Outbound call API response status:", response.status);
-      if (!response.ok) {
-        return response.text().then(text => { throw new Error(text); });
-      }
-      return response.json();
-    });
-  }
-  function triggerCallForContact(contactId) {
-    console.log("Triggering call for contact:", contactId);
-    fetchExternalContact(contactId)
-    .then(contactData => {
-      const phoneNumber = (contactData.workPhone && contactData.workPhone.e164) || null;
-      if (!phoneNumber) {
-        throw new Error("No work phone number found for external contact " + contactId);
-      }
-      console.log("Using work phone number:", phoneNumber, "for outbound call.");
-      return triggerCallWithPhone(phoneNumber, contactId);
-    })
-    .then(callData => {
-      console.log("Call triggered successfully:", callData);
-    })
-    .catch(error => {
-      console.error("Error triggering call for contact", contactId, ":", error);
-    });
-  }
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(text => { throw new Error(text); });
+        }
+        return response.json();
+      });
+    }
 
-  /*****************************************
-   * Extra Buttons Handlers (New Contacts) *
-   *****************************************/
-  const extraContacts = [
-    { label: "Jakob Jarc Sojč", id: "4c6494e1-ec2e-4546-9d65-3f8a6ea74da5" },
-    { label: "Sanja Strovjanova", id: "1e9f1b03-d46c-40eb-9039-3410f9506c72" },
-    { label: "HUN IT", id: "4329683a-066a-45b9-9fef-a7099ef3e515" }
-  ];
-  document.getElementById("btn-jakob").addEventListener("click", function() {
-    triggerCallForContact(extraContacts[0].id);
-  });
-  document.getElementById("btn-sanja").addEventListener("click", function() {
-    triggerCallForContact(extraContacts[1].id);
-  });
-  document.getElementById("btn-hun").addEventListener("click", function() {
-    triggerCallForContact(extraContacts[2].id);
-  });
+    function triggerCallWithPhone(phoneNumber, contactId) {
+      const apiUrl = "https://api.mypurecloud.de/api/v2/conversations/calls";
+      const payload = {
+        callFromQueueId: callFromQueueId,
+        phoneNumber: phoneNumber,
+        callerId: callerId,
+        externalContactId: contactId,
+        destinations: [
+          {
+            address: phoneNumber,
+            addressType: "phone"
+          }
+        ]
+      };
+      console.log("Making outbound call API request with payload:", payload);
+      return fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + accessToken,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        console.log("Outbound call API response status:", response.status);
+        if (!response.ok) {
+          return response.text().then(text => { throw new Error(text); });
+        }
+        return response.json();
+      });
+    }
 
-  /*****************************************
-   * Hide Warning Box if No Text is Present  *
-   *****************************************/
-  const warningBox = document.getElementById("warning-box");
-  if (warningBox.textContent.trim() === "") {
-    warningBox.style.display = "none";
-  }
-</script>
+    function triggerCallForContact(contactId) {
+      console.log("Triggering call for contact:", contactId);
+      fetchExternalContact(contactId)
+      .then(contactData => {
+        const phoneNumber = (contactData.workPhone && contactData.workPhone.e164) || null;
+        if (!phoneNumber) {
+          throw new Error("No work phone number found for external contact " + contactId);
+        }
+        console.log("Using work phone number:", phoneNumber, "for outbound call.");
+        return triggerCallWithPhone(phoneNumber, contactId);
+      })
+      .then(callData => {
+        console.log("Call triggered successfully:", callData);
+      })
+      .catch(error => {
+        console.error("Error triggering call for contact", contactId, ":", error);
+      });
+    }
+
+    /*****************************************
+     * Extra Buttons Handlers (New Contacts) *
+     *****************************************/
+    const extraContacts = [
+      { label: "Jakob Jarc Sojč", id: "4c6494e1-ec2e-4546-9d65-3f8a6ea74da5" },
+      { label: "Sanja Strovjanova", id: "1e9f1b03-d46c-40eb-9039-3410f9506c72" },
+      { label: "HUN IT", id: "4329683a-066a-45b9-9fef-a7099ef3e515" }
+    ];
+    document.getElementById("btn-jakob").addEventListener("click", function() {
+      triggerCallForContact(extraContacts[0].id);
+    });
+    document.getElementById("btn-sanja").addEventListener("click", function() {
+      triggerCallForContact(extraContacts[1].id);
+    });
+    document.getElementById("btn-hun").addEventListener("click", function() {
+      triggerCallForContact(extraContacts[2].id);
+    });
+
+    /*****************************************
+     * Hide Warning Box if No Text is Present
+     *****************************************/
+    const warningBox = document.getElementById("warning-box");
+    if (warningBox.textContent.trim() === "") {
+      warningBox.style.display = "none";
+    }
+  </script>
 </body>
 </html>
