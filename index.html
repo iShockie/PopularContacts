@@ -181,7 +181,7 @@
     <em>Prosimo, da ko beležite primere v Santoriniju, ki so povezani s potresi, zadeve ustrezno označite v SAX-u.<br>
 Pod "Case type:" izberite Santorini_Quakes_25</em>
   </div>
-   <div class="notice-box" id="notice-box">
+  <div class="notice-box" id="notice-box">
     <strong>DOMINICAN REPUBLIC:</strong><br>
     <em>Ob prijavi asistenčnih primerov v Dominikanski Republiki ne potrjujte nobenih stroškov, najprej obvestite Sanjo S. in Jakoba. Primere vnašajte v primerno tabelo.</em>
   </div>
@@ -215,7 +215,6 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
         window.opener.postMessage({ token: token }, "*");
         window.close();
       }
-      // If no token is found in the popup URL hash, do nothing.
     }
 
     /*******************************************************
@@ -236,7 +235,6 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
 
     // OAuth configuration
     const clientId = 'c6dcc699-08b2-4484-a165-63dcf225e982';
-    // The redirect URI must point to this same page (or a page with similar code) so that the popup can post the token back.
     const redirectUriValue = "https://ishockie.github.io/PopularContacts/";
     const state = "abc123";
     const oauthEndpoint = "https://login.mypurecloud.de/oauth/authorize";
@@ -302,7 +300,6 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
        *****************************************/
       const dayToggle = Math.floor(Date.now() / 86400000) % 2; // 0 or 1
       if(dayToggle === 0) {
-        // Swap specific contacts based on index
         [rsaLjubljanaContacts[1], rsaLjubljanaContacts[2]] = [rsaLjubljanaContacts[2], rsaLjubljanaContacts[1]];
         [rsaKoperContacts[1], rsaKoperContacts[2]] = [rsaKoperContacts[2], rsaKoperContacts[1]];
         [rsaMariborContacts[0], rsaMariborContacts[1]] = [rsaMariborContacts[1], rsaMariborContacts[0]];
@@ -364,7 +361,6 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
           });
           return btn;
         }
-        // Render columns
         const ljCol = document.getElementById(prefix + "ljubljana-column");
         ljContacts.forEach(contact => {
           ljCol.appendChild(createButton(contact));
@@ -473,12 +469,10 @@ Pod "Case type:" izberite Santorini_Quakes_25</em>
       });
       
       /*****************************************
-       * Hide Warning Box if No Text is Present  *
+       * Hide Warning Box after Successful Login *
        *****************************************/
       const warningBox = document.getElementById("warning-box");
-      if (warningBox.textContent.trim() === "") {
-        warningBox.style.display = "none";
-      }
+      warningBox.style.display = "none";
     }
   </script>
 </body>
